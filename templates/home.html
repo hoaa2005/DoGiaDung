@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="vi" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DGD - Đại Lý Đồ Gia Dụng</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            pastel: '#FFD1DC',
+            'pastel-dark': '#DE6FA1',
+            'pastel-light': '#FFF0F3',
+            'bg-cream': '#FDFBFB',
+            'text-main': '#333333',
+            'rose-gold': '#E0B0FF'
+          },
+          fontFamily: {
+            'vietnam': ['Be Vietnam Pro', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html, body { height: 100%; margin: 0; }
+    * { font-family: 'Be Vietnam Pro', sans-serif; }
+    .app-scroll { height: 100%; overflow-y: auto; overflow-x: hidden; }
+    .product-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .product-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(255, 209, 220, 0.3); }
+    .nav-item { transition: all 0.2s ease; }
+    .nav-item:hover { opacity: 0.8; transform: scale(1.05); }
+    .badge-pulse { animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeInUp 0.5s ease forwards; }
+    .fade-in-delay-1 { animation-delay: 0.1s; opacity: 0; }
+    .fade-in-delay-2 { animation-delay: 0.2s; opacity: 0; }
+    .fade-in-delay-3 { animation-delay: 0.3s; opacity: 0; }
+    .fade-in-delay-4 { animation-delay: 0.4s; opacity: 0; }
+    .search-input:focus { box-shadow: 0 0 0 3px rgba(255, 209, 220, 0.5); }
+    .btn-primary { background: linear-gradient(135deg, #FFD1DC, #DE6FA1); transition: all 0.3s ease; }
+    .btn-primary:hover { background: linear-gradient(135deg, #DE6FA1, #FFD1DC); transform: scale(1.02); }
+    .category-card { transition: all 0.3s ease; }
+    .category-card:hover { transform: scale(1.05); background: #FFD1DC; }
+    .category-card:hover .cat-icon { color: white; }
+    .category-card:hover .cat-text { color: white; }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full bg-[#FDFBFB]">
+  <div class="app-scroll w-full" id="app-root"><!-- Sticky Header -->
+   <header class="sticky top-0 z-50 w-full" id="main-header" style="background: linear-gradient(135deg, #FFD1DC 0%, #F8C8DC 100%); box-shadow: 0 4px 20px rgba(255, 209, 220, 0.4);">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4"><!-- Logo -->
+     <div class="flex-shrink-0">
+      <h1 class="text-white font-bold text-2xl md:text-3xl tracking-tight" id="logo-text">DGD</h1>
+      <p class="text-white/70 text-[10px] font-light -mt-1 hidden md:block">Đồ Gia Dụng</p>
+     </div><!-- Search Bar -->
+     <div class="flex-1 max-w-xl mx-auto relative"><input type="text" id="search-input" class="search-input w-full py-2.5 px-4 pr-10 rounded-full border-0 outline-none text-sm text-text-main bg-white/95 placeholder:text-gray-400" placeholder="Bạn cần tìm sản phẩm gì?"> <button class="absolute right-3 top-1/2 -translate-y-1/2 text-pastel-dark hover:text-pastel transition"> <i data-lucide="search" style="width:18px;height:18px;"></i> </button>
+     </div><!-- Nav Items -->
+     <nav class="hidden md:flex items-center gap-5">
+      <div class="nav-item group relative"><button class="flex flex-col items-center text-white text-xs gap-0.5"> <i data-lucide="home" style="width:20px;height:20px;"></i> <span>Trang chủ</span> </button>
+      </div>
+      <div class="nav-item group relative"><button class="flex flex-col items-center text-white text-xs gap-0.5"> <i data-lucide="grid" style="width:20px;height:20px;"></i> <span>Sản phẩm</span> </button> <!-- Category Dropdown -->
+       <div class="absolute left-0 mt-0 w-48 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-40 py-2"><a href="#" class="block px-4 py-2 text-sm text-text-main hover:bg-pink-50 transition">🍳 Bếp nấu ăn</a> <a href="#" class="block px-4 py-2 text-sm text-text-main hover:bg-pink-50 transition">❄️ Tủ lạnh</a> <a href="#" class="block px-4 py-2 text-sm text-text-main hover:bg-pink-50 transition">👕 Máy giặt</a> <a href="#" class="block px-4 py-2 text-sm text-text-main hover:bg-pink-50 transition">💨 Điều hòa</a> <a href="#" class="block px-4 py-2 text-sm text-text-main hover:bg-pink-50 transition">☕ Máy pha chế</a> <a href="#" class="block px-4 py-2 text-sm text-text-main hover:bg-pink-50 transition">🧹 Vệ sinh</a> <a href="#" class="block px-4 py-2 text-sm text-text-main hover:bg-pink-50 transition">💡 Chiếu sáng</a> <a href="#" class="block px-4 py-2 text-sm text-text-main hover:bg-pink-50 transition">🔌 Sản phẩm khác</a>
+       </div>
+      </div><a href="#" class="nav-item flex flex-col items-center text-white text-xs gap-0.5"> <i data-lucide="package" style="width:20px;height:20px;"></i> <span>Đơn hàng</span> </a> <a href="#" class="nav-item flex flex-col items-center text-white text-xs gap-0.5 relative"> <i data-lucide="shopping-cart" style="width:20px;height:20px;"></i> <span class="badge-pulse absolute -top-1 -right-2 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">3</span> <span>Giỏ hàng</span> </a> <a href="#" class="nav-item flex flex-col items-center text-white text-xs gap-0.5 relative group"> <i data-lucide="user" style="width:20px;height:20px;"></i> <span>Tài khoản</span> <!-- Account Dropdown -->
+       <div class="absolute right-0 mt-0 w-40 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-40 py-2"><button onclick="openLoginModal()" class="w-full text-left px-4 py-2 text-sm text-text-main hover:bg-pink-50 transition">📝 Đăng nhập</button> <button onclick="handleLogout()" class="w-full text-left px-4 py-2 text-sm text-text-main hover:bg-pink-50 transition">🚪 Đăng xuất</button>
+       </div></a>
+     </nav><!-- Mobile menu button --> <button class="md:hidden text-white" id="mobile-menu-btn"> <i data-lucide="menu" style="width:24px;height:24px;"></i> </button>
+    </div>
+   </header><!-- Mobile Nav Dropdown -->
+   <div id="mobile-nav" class="hidden md:hidden bg-white border-b border-pink-100 px-4 py-3 flex justify-around"><a href="#" class="flex flex-col items-center text-pastel-dark text-xs gap-1"> <i data-lucide="home" style="width:18px;height:18px;"></i><span>Trang chủ</span> </a> <a href="#" class="flex flex-col items-center text-pastel-dark text-xs gap-1"> <i data-lucide="package" style="width:18px;height:18px;"></i><span>Đơn hàng</span> </a> <a href="#" class="flex flex-col items-center text-pastel-dark text-xs gap-1 relative"> <i data-lucide="shopping-cart" style="width:18px;height:18px;"></i> <span class="absolute -top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">3</span> <span>Giỏ hàng</span> </a> <a href="#" class="flex flex-col items-center text-pastel-dark text-xs gap-1"> <i data-lucide="user" style="width:18px;height:18px;"></i><span>Tài khoản</span> </a>
+   </div><!-- Hero Banner -->
+   <section class="w-full px-4 pt-6 pb-4 max-w-7xl mx-auto fade-in">
+    <div class="relative rounded-2xl overflow-hidden" style="background-image: url('https://samnec.com.vn/uploads/tin-tuc/1697765805.png'); background-size: cover; background-position: center; min-height: 250px;">
+    </div>
+   </section><!-- Categories -->
+   <section class="w-full px-4 py-6 max-w-7xl mx-auto">
+    <h3 class="text-lg font-semibold text-text-main mb-4">Danh mục sản phẩm</h3>
+    <div class="grid grid-cols-4 md:grid-cols-8 gap-3">
+     <div class="category-card flex flex-col items-center p-3 rounded-xl bg-white border border-pink-50 cursor-pointer shadow-sm">
+      <div class="cat-icon w-12 h-12 mb-1 bg-gray-100 rounded-lg flex items-center justify-center"><img src="" alt="Danh mục" class="max-w-full max-h-full object-contain" loading="lazy" onerror="console.error('Image failed to load:', this.src); this.style.display='none';">
+      </div><span class="cat-text text-[11px] text-text-main font-medium text-center">Bếp</span>
+     </div>
+     <div class="category-card flex flex-col items-center p-3 rounded-xl bg-white border border-pink-50 cursor-pointer shadow-sm">
+      <div class="cat-icon w-12 h-12 mb-1 bg-gray-100 rounded-lg flex items-center justify-center"><img src="" alt="Danh mục" class="max-w-full max-h-full object-contain" loading="lazy" onerror="console.error('Image failed to load:', this.src); this.style.display='none';">
+      </div><span class="cat-text text-[11px] text-text-main font-medium text-center">Tủ lạnh</span>
+     </div>
+     <div class="category-card flex flex-col items-center p-3 rounded-xl bg-white border border-pink-50 cursor-pointer shadow-sm">
+      <div class="cat-icon w-12 h-12 mb-1 bg-gray-100 rounded-lg flex items-center justify-center"><img src="" alt="Danh mục" class="max-w-full max-h-full object-contain" loading="lazy" onerror="console.error('Image failed to load:', this.src); this.style.display='none';">
+      </div><span class="cat-text text-[11px] text-text-main font-medium text-center">Giặt giũ</span>
+     </div>
+     <div class="category-card flex flex-col items-center p-3 rounded-xl bg-white border border-pink-50 cursor-pointer shadow-sm">
+      <div class="cat-icon w-12 h-12 mb-1 bg-gray-100 rounded-lg flex items-center justify-center"><img src="" alt="Danh mục" class="max-w-full max-h-full object-contain" loading="lazy" onerror="console.error('Image failed to load:', this.src); this.style.display='none';">
+      </div><span class="cat-text text-[11px] text-text-main font-medium text-center">Điều hòa</span>
+     </div>
+     <div class="category-card flex flex-col items-center p-3 rounded-xl bg-white border border-pink-50 cursor-pointer shadow-sm">
+      <div class="cat-icon w-12 h-12 mb-1 bg-gray-100 rounded-lg flex items-center justify-center"><img src="" alt="Danh mục" class="max-w-full max-h-full object-contain" loading="lazy" onerror="console.error('Image failed to load:', this.src); this.style.display='none';">
+      </div><span class="cat-text text-[11px] text-text-main font-medium text-center">Pha chế</span>
+     </div>
+     <div class="category-card flex flex-col items-center p-3 rounded-xl bg-white border border-pink-50 cursor-pointer shadow-sm">
+      <div class="cat-icon w-12 h-12 mb-1 bg-gray-100 rounded-lg flex items-center justify-center"><img src="" alt="Danh mục" class="max-w-full max-h-full object-contain" loading="lazy" onerror="console.error('Image failed to load:', this.src); this.style.display='none';">
+      </div><span class="cat-text text-[11px] text-text-main font-medium text-center">Vệ sinh</span>
+     </div>
+     <div class="category-card flex flex-col items-center p-3 rounded-xl bg-white border border-pink-50 cursor-pointer shadow-sm">
+      <div class="cat-icon w-12 h-12 mb-1 bg-gray-100 rounded-lg flex items-center justify-center"><img src="" alt="Danh mục" class="max-w-full max-h-full object-contain" loading="lazy" onerror="console.error('Image failed to load:', this.src); this.style.display='none';">
+      </div><span class="cat-text text-[11px] text-text-main font-medium text-center">Chiếu sáng</span>
+     </div>
+     <div class="category-card flex flex-col items-center p-3 rounded-xl bg-white border border-pink-50 cursor-pointer shadow-sm">
+      <div class="cat-icon w-12 h-12 mb-1 bg-gray-100 rounded-lg flex items-center justify-center"><img src="" alt="Danh mục" class="max-w-full max-h-full object-contain" loading="lazy" onerror="console.error('Image failed to load:', this.src); this.style.display='none';">
+      </div><span class="cat-text text-[11px] text-text-main font-medium text-center">Khác</span>
+     </div>
+    </div>
+   </section><!-- Flash Sale -->
+   <section class="w-full px-4 py-4 max-w-7xl mx-auto">
+    <div class="flex items-center justify-between mb-4">
+     <div class="flex items-center gap-2">
+      <h3 class="text-lg font-semibold text-text-main">⚡ Flash Sale</h3>
+      <div class="flex gap-1" id="countdown"><span class="bg-pastel-dark text-white text-xs font-bold px-1.5 py-0.5 rounded">02</span> <span class="text-pastel-dark font-bold">:</span> <span class="bg-pastel-dark text-white text-xs font-bold px-1.5 py-0.5 rounded">15</span> <span class="text-pastel-dark font-bold">:</span> <span class="bg-pastel-dark text-white text-xs font-bold px-1.5 py-0.5 rounded">33</span>
+      </div>
+     </div><a href="#" class="text-pastel-dark text-sm font-medium hover:underline">Xem tất cả →</a>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4"><!-- Product 1 -->
+     <div class="product-card bg-white rounded-2xl overflow-hidden border border-pink-50 shadow-sm fade-in fade-in-delay-1">
+      <div class="relative bg-gray-100 p-4 flex items-center justify-center h-48 overflow-hidden"><img src="" alt="Sản phẩm" class="max-w-full max-h-full object-contain" loading="lazy" onerror="console.error('Image failed to load:', this.src); this.style.display='none';"><span class="absolute top-2 left-2 bg-pastel-dark text-white text-[10px] font-bold px-2 py-0.5 rounded-full">-35%</span> <button class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-pink-50 transition"> <i data-lucide="heart" style="width:14px;height:14px;color:#DE6FA1;"></i> </button>
+      </div>
+      <div class="p-3">
+       <p class="text-xs text-gray-400 mb-1">Philips</p>
+       <h4 class="text-sm font-medium text-text-main line-clamp-2 mb-2">Nồi chiên không dầu 5.5L</h4>
+       <div class="flex items-end gap-2"><span class="text-pastel-dark font-bold text-base">1.890.000₫</span> <span class="text-gray-400 text-xs line-through">2.900.000₫</span>
+       </div>
+       <div class="mt-2 w-full bg-pink-100 rounded-full h-1.5">
+        <div class="bg-pastel-dark h-1.5 rounded-full" style="width: 72%"></div>
+       </div>
+       <p class="text-[10px] text-gray-400 mt-1">Đã bán 72%</p>
+       <div class="mt-3 flex gap-2">
+        <button class="flex-1 bg-pastel-dark text-white text-xs font-semibold py-1.5 rounded-lg hover:bg-pastel-dark/90 transition">Mua ngay</button> <button class="flex-1 border border-pastel-dark text-pastel-dark text-xs font-semibold py-1.5 rounded-lg hover:bg-pink-50 transition">Thêm giỏ</button>
+       </div>
+      </div>
+     </div><!-- Product 2 -->
+     <div class="product-card bg-white rounded-2xl overflow-hidden border border-pink-50 shadow-sm fade-in fade-in-delay-2">
+      <div class="relative bg-gradient-to-br from-gray-50 to-pink-50 p-4 flex items-center justify-center h-36">
+       <div class="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 text-sm">
+        Ảnh
+       </div><span class="absolute top-2 left-2 bg-pastel-dark text-white text-[10px] font-bold px-2 py-0.5 rounded-full">-20%</span> <button class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-pink-50 transition"> <i data-lucide="heart" style="width:14px;height:14px;color:#DE6FA1;"></i> </button>
+      </div>
+      <div class="p-3">
+       <p class="text-xs text-gray-400 mb-1">Samsung</p>
+       <h4 class="text-sm font-medium text-text-main line-clamp-2 mb-2">Tủ lạnh Inverter 320L</h4>
+       <div class="flex items-end gap-2"><span class="text-pastel-dark font-bold text-base">8.490.000₫</span> <span class="text-gray-400 text-xs line-through">10.600.000₫</span>
+       </div>
+       <div class="mt-2 w-full bg-pink-100 rounded-full h-1.5">
+        <div class="bg-pastel-dark h-1.5 rounded-full" style="width: 45%"></div>
+       </div>
+       <p class="text-[10px] text-gray-400 mt-1">Đã bán 45%</p>
+       <div class="mt-3 flex gap-2">
+        <button class="flex-1 bg-pastel-dark text-white text-xs font-semibold py-1.5 rounded-lg hover:bg-pastel-dark/90 transition">Mua ngay</button> <button class="flex-1 border border-pastel-dark text-pastel-dark text-xs font-semibold py-1.5 rounded-lg hover:bg-pink-50 transition">Thêm giỏ</button>
+       </div>
+      </div>
+     </div><!-- Product 3 -->
+     <div class="product-card bg-white rounded-2xl overflow-hidden border border-pink-50 shadow-sm fade-in fade-in-delay-3">
+      <div class="relative bg-gradient-to-br from-gray-50 to-pink-50 p-4 flex items-center justify-center h-36">
+       <div class="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 text-sm">
+        Ảnh
+       </div><span class="absolute top-2 left-2 bg-pastel-dark text-white text-[10px] font-bold px-2 py-0.5 rounded-full">-40%</span> <button class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-pink-50 transition"> <i data-lucide="heart" style="width:14px;height:14px;color:#DE6FA1;"></i> </button>
+      </div>
+      <div class="p-3">
+       <p class="text-xs text-gray-400 mb-1">LG</p>
+       <h4 class="text-sm font-medium text-text-main line-clamp-2 mb-2">Máy giặt cửa trước 9kg</h4>
+       <div class="flex items-end gap-2"><span class="text-pastel-dark font-bold text-base">6.290.000₫</span> <span class="text-gray-400 text-xs line-through">10.490.000₫</span>
+       </div>
+       <div class="mt-2 w-full bg-pink-100 rounded-full h-1.5">
+        <div class="bg-pastel-dark h-1.5 rounded-full" style="width: 88%"></div>
+       </div>
+       <p class="text-[10px] text-gray-400 mt-1">Đã bán 88%</p>
+       <div class="mt-3 flex gap-2">
+        <button class="flex-1 bg-pastel-dark text-white text-xs font-semibold py-1.5 rounded-lg hover:bg-pastel-dark/90 transition">Mua ngay</button> <button class="flex-1 border border-pastel-dark text-pastel-dark text-xs font-semibold py-1.5 rounded-lg hover:bg-pink-50 transition">Thêm giỏ</button>
+       </div>
+      </div>
+     </div><!-- Product 4 -->
+     <div class="product-card bg-white rounded-2xl overflow-hidden border border-pink-50 shadow-sm fade-in fade-in-delay-4">
+      <div class="relative bg-gradient-to-br from-gray-50 to-pink-50 p-4 flex items-center justify-center h-36">
+       <div class="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 text-sm">
+        Ảnh
+       </div><span class="absolute top-2 left-2 bg-pastel-dark text-white text-[10px] font-bold px-2 py-0.5 rounded-full">-25%</span> <button class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-pink-50 transition"> <i data-lucide="heart" style="width:14px;height:14px;color:#DE6FA1;"></i> </button>
+      </div>
+      <div class="p-3">
+       <p class="text-xs text-gray-400 mb-1">DeLonghi</p>
+       <h4 class="text-sm font-medium text-text-main line-clamp-2 mb-2">Máy pha cà phê tự động</h4>
+       <div class="flex items-end gap-2"><span class="text-pastel-dark font-bold text-base">4.590.000₫</span> <span class="text-gray-400 text-xs line-through">6.120.000₫</span>
+       </div>
+       <div class="mt-2 w-full bg-pink-100 rounded-full h-1.5">
+        <div class="bg-pastel-dark h-1.5 rounded-full" style="width: 60%"></div>
+       </div>
+       <p class="text-[10px] text-gray-400 mt-1">Đã bán 60%</p>
+       <div class="mt-3 flex gap-2">
+        <button class="flex-1 bg-pastel-dark text-white text-xs font-semibold py-1.5 rounded-lg hover:bg-pastel-dark/90 transition">Mua ngay</button> <button class="flex-1 border border-pastel-dark text-pastel-dark text-xs font-semibold py-1.5 rounded-lg hover:bg-pink-50 transition">Thêm giỏ</button>
+       </div>
+      </div>
+     </div>
+    </div>
+   </section><!-- Popular Products -->
+   <section class="w-full px-4 py-6 max-w-7xl mx-auto">
+    <div class="flex items-center justify-between mb-4">
+     <h3 class="text-lg font-semibold text-text-main">Sản phẩm phổ biến</h3><a href="#" class="text-pastel-dark text-sm font-medium hover:underline">Xem thêm →</a>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+     <div class="product-card bg-white rounded-2xl overflow-hidden border border-pink-50 shadow-sm">
+      <div class="bg-gradient-to-br from-gray-50 to-pink-50 p-4 flex items-center justify-center h-36 relative">
+       <div class="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 text-sm">
+        Ảnh
+       </div><button class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-pink-50 transition"> <i data-lucide="heart" style="width:14px;height:14px;color:#DE6FA1;"></i> </button>
+      </div>
+      <div class="p-3">
+       <p class="text-xs text-gray-400 mb-1">Daikin</p>
+       <h4 class="text-sm font-medium text-text-main mb-2">Điều hòa Inverter 12000BTU</h4><span class="text-pastel-dark font-bold">9.990.000₫</span>
+       <div class="flex items-center gap-1 mt-1"><span class="text-yellow-400 text-xs">★★★★★</span> <span class="text-gray-400 text-[10px]">(128)</span>
+       </div>
+       <div class="mt-3 flex gap-2">
+        <button class="flex-1 bg-pastel-dark text-white text-xs font-semibold py-1.5 rounded-lg hover:bg-pastel-dark/90 transition">Mua ngay</button> <button class="flex-1 border border-pastel-dark text-pastel-dark text-xs font-semibold py-1.5 rounded-lg hover:bg-pink-50 transition">Thêm giỏ</button>
+       </div>
+      </div>
+     </div>
+     <div class="product-card bg-white rounded-2xl overflow-hidden border border-pink-50 shadow-sm">
+      <div class="bg-gradient-to-br from-gray-50 to-pink-50 p-4 flex items-center justify-center h-36 relative">
+       <div class="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 text-sm">
+        Ảnh
+       </div><button class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-pink-50 transition"> <i data-lucide="heart" style="width:14px;height:14px;color:#DE6FA1;"></i> </button>
+      </div>
+      <div class="p-3">
+       <p class="text-xs text-gray-400 mb-1">Dyson</p>
+       <h4 class="text-sm font-medium text-text-main mb-2">Máy hút bụi không dây V15</h4><span class="text-pastel-dark font-bold">12.990.000₫</span>
+       <div class="flex items-center gap-1 mt-1"><span class="text-yellow-400 text-xs">★★★★★</span> <span class="text-gray-400 text-[10px]">(89)</span>
+       </div>
+       <div class="mt-3 flex gap-2">
+        <button class="flex-1 bg-pastel-dark text-white text-xs font-semibold py-1.5 rounded-lg hover:bg-pastel-dark/90 transition">Mua ngay</button> <button class="flex-1 border border-pastel-dark text-pastel-dark text-xs font-semibold py-1.5 rounded-lg hover:bg-pink-50 transition">Thêm giỏ</button>
+       </div>
+      </div>
+     </div>
+     <div class="product-card bg-white rounded-2xl overflow-hidden border border-pink-50 shadow-sm">
+      <div class="bg-gradient-to-br from-gray-50 to-pink-50 p-4 flex items-center justify-center h-36 relative">
+       <div class="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 text-sm">
+        Ảnh
+       </div><button class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-pink-50 transition"> <i data-lucide="heart" style="width:14px;height:14px;color:#DE6FA1;"></i> </button>
+      </div>
+      <div class="p-3">
+       <p class="text-xs text-gray-400 mb-1">Panasonic</p>
+       <h4 class="text-sm font-medium text-text-main mb-2">Lò vi sóng đa năng 25L</h4><span class="text-pastel-dark font-bold">3.290.000₫</span>
+       <div class="flex items-center gap-1 mt-1"><span class="text-yellow-400 text-xs">★★★★☆</span> <span class="text-gray-400 text-[10px]">(56)</span>
+       </div>
+       <div class="mt-3 flex gap-2">
+        <button class="flex-1 bg-pastel-dark text-white text-xs font-semibold py-1.5 rounded-lg hover:bg-pastel-dark/90 transition">Mua ngay</button> <button class="flex-1 border border-pastel-dark text-pastel-dark text-xs font-semibold py-1.5 rounded-lg hover:bg-pink-50 transition">Thêm giỏ</button>
+       </div>
+      </div>
+     </div>
+     <div class="product-card bg-white rounded-2xl overflow-hidden border border-pink-50 shadow-sm">
+      <div class="bg-gradient-to-br from-gray-50 to-pink-50 p-4 flex items-center justify-center h-36 relative">
+       <div class="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 text-sm">
+        Ảnh
+       </div><button class="absolute top-2 right-2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-pink-50 transition"> <i data-lucide="heart" style="width:14px;height:14px;color:#DE6FA1;"></i> </button>
+      </div>
+      <div class="p-3">
+       <p class="text-xs text-gray-400 mb-1">Ariston</p>
+       <h4 class="text-sm font-medium text-text-main mb-2">Máy nước nóng 30L</h4><span class="text-pastel-dark font-bold">4.190.000₫</span>
+       <div class="flex items-center gap-1 mt-1"><span class="text-yellow-400 text-xs">★★★★★</span> <span class="text-gray-400 text-[10px]">(203)</span>
+       </div>
+       <div class="mt-3 flex gap-2">
+        <button class="flex-1 bg-pastel-dark text-white text-xs font-semibold py-1.5 rounded-lg hover:bg-pastel-dark/90 transition">Mua ngay</button> <button class="flex-1 border border-pastel-dark text-pastel-dark text-xs font-semibold py-1.5 rounded-lg hover:bg-pink-50 transition">Thêm giỏ</button>
+       </div>
+      </div>
+     </div>
+    </div>
+   </section><!-- Footer -->
+   <footer class="w-full bg-white border-t border-pink-100 mt-8">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div>
+       <h4 class="font-bold text-text-main text-lg mb-2" id="footer-brand">DGD</h4>
+       <p class="text-sm text-gray-500">Đại lý đồ gia dụng chính hãng. Uy tín - Chất lượng - Giá tốt nhất.</p>
+      </div>
+      <div>
+       <h5 class="font-semibold text-text-main mb-2 text-sm">Hỗ trợ</h5>
+       <ul class="space-y-1 text-sm text-gray-500">
+        <li><a href="#" class="hover:text-pastel-dark transition">Chính sách đổi trả</a></li>
+        <li><a href="#" class="hover:text-pastel-dark transition">Bảo hành</a></li>
+        <li><a href="#" class="hover:text-pastel-dark transition">Vận chuyển</a></li>
+       </ul>
+      </div>
+      <div>
+       <h5 class="font-semibold text-text-main mb-2 text-sm">Liên hệ</h5>
+       <ul class="space-y-1 text-sm text-gray-500">
+        <li>📞 1900 1234</li>
+        <li>📧 info@dgd.vn</li>
+        <li>📍 123 Nguyễn Huệ, Q1, HCM</li>
+       </ul>
+      </div>
+      <div>
+       <h5 class="font-semibold text-text-main mb-2 text-sm">Kết nối</h5>
+       <div class="flex gap-3"><a href="#" class="w-8 h-8 bg-pink-50 rounded-full flex items-center justify-center text-pastel-dark hover:bg-pastel hover:text-white transition"> <i data-lucide="facebook" style="width:16px;height:16px;"></i> </a> <a href="#" class="w-8 h-8 bg-pink-50 rounded-full flex items-center justify-center text-pastel-dark hover:bg-pastel hover:text-white transition"> <i data-lucide="instagram" style="width:16px;height:16px;"></i> </a> <a href="#" class="w-8 h-8 bg-pink-50 rounded-full flex items-center justify-center text-pastel-dark hover:bg-pastel hover:text-white transition"> <i data-lucide="phone" style="width:16px;height:16px;"></i> </a>
+       </div>
+      </div>
+     </div>
+     <div class="mt-6 pt-4 border-t border-pink-50 text-center text-xs text-gray-400">
+      © 2024 DGD - Đại Lý Đồ Gia Dụng. All rights reserved.
+     </div>
+    </div>
+   </footer><!-- Login Modal -->
+   <div id="login-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl p-6 w-96 shadow-2xl">
+     <div class="flex justify-between items-center mb-4">
+      <h2 class="text-2xl font-bold text-text-main">Đăng nhập</h2><button onclick="closeLoginModal()" class="text-gray-400 hover:text-gray-600"> <i data-lucide="x" style="width:24px;height:24px;"></i> </button>
+     </div>
+     <div class="space-y-4">
+      <div><label class="block text-sm font-medium text-text-main mb-1">Email</label> <input type="email" id="login-email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pastel-dark" placeholder="Nhập email">
+      </div>
+      <div><label class="block text-sm font-medium text-text-main mb-1">Mật khẩu</label> <input type="password" id="login-password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pastel-dark" placeholder="Nhập mật khẩu">
+      </div><button onclick="handleLogin()" class="w-full bg-pastel-dark text-white py-2 rounded-lg font-semibold hover:bg-pastel-dark/90 transition">Đăng nhập</button>
+      <p class="text-center text-sm text-gray-600">Chưa có tài khoản? <a href="#" class="text-pastel-dark font-semibold hover:underline">Đăng ký</a></p>
+     </div>
+    </div>
+   </div><!-- Success Toast -->
+   <div id="toast" class="hidden fixed top-4 right-4 bg-pastel-dark text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2"><i data-lucide="check-circle" style="width:20px;height:20px;"></i> <span id="toast-text">Thành công!</span>
+   </div>
+  </div>
+  <script>
+    // Default config
+    const defaultConfig = {
+      brand_name: 'DGD',
+      search_placeholder: 'Bạn cần tìm sản phẩm gì?',
+      banner_title: 'Khuyến mãi mùa hè',
+      banner_subtitle: 'Giảm đến 40% cho đồ gia dụng cao cấp',
+      background_color: '#FDFBFB',
+      surface_color: '#FFFFFF',
+      text_color: '#333333',
+      primary_action_color: '#FFD1DC',
+      secondary_action_color: '#DE6FA1',
+      font_family: 'Be Vietnam Pro',
+      font_size: 14
+    };
+
+    // Element SDK init
+    window.elementSdk.init({
+      defaultConfig,
+      onConfigChange: async (config) => {
+        const c = { ...defaultConfig, ...config };
+
+        document.getElementById('logo-text').textContent = c.brand_name;
+        document.getElementById('footer-brand').textContent = c.brand_name;
+        document.getElementById('search-input').placeholder = c.search_placeholder;
+        document.getElementById('banner-title').textContent = c.banner_title;
+        document.getElementById('banner-subtitle').textContent = c.banner_subtitle;
+
+        // Colors
+        document.body.style.backgroundColor = c.background_color;
+        document.getElementById('main-header').style.background = `linear-gradient(135deg, ${c.primary_action_color} 0%, ${c.primary_action_color}dd 100%)`;
+
+        // Font
+        const fontStack = `${c.font_family}, sans-serif`;
+        document.body.style.fontFamily = fontStack;
+
+        // Font size
+        const base = c.font_size;
+        document.querySelectorAll('h2').forEach(el => el.style.fontSize = `${base * 2}px`);
+        document.querySelectorAll('h3').forEach(el => el.style.fontSize = `${base * 1.3}px`);
+        document.querySelectorAll('h4').forEach(el => el.style.fontSize = `${base}px`);
+        document.querySelectorAll('p, span, a, li').forEach(el => {
+          if (!el.closest('.badge-pulse') && !el.classList.contains('text-5xl')) {
+            el.style.fontSize = el.style.fontSize || '';
+          }
+        });
+      },
+      mapToCapabilities: (config) => {
+        const c = { ...defaultConfig, ...config };
+        return {
+          recolorables: [
+            { get: () => c.background_color, set: (v) => { c.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+            { get: () => c.surface_color, set: (v) => { c.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+            { get: () => c.text_color, set: (v) => { c.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+            { get: () => c.primary_action_color, set: (v) => { c.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); } },
+            { get: () => c.secondary_action_color, set: (v) => { c.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); } }
+          ],
+          borderables: [],
+          fontEditable: { get: () => c.font_family, set: (v) => { c.font_family = v; window.elementSdk.setConfig({ font_family: v }); } },
+          fontSizeable: { get: () => c.font_size, set: (v) => { c.font_size = v; window.elementSdk.setConfig({ font_size: v }); } }
+        };
+      },
+      mapToEditPanelValues: (config) => {
+        const c = { ...defaultConfig, ...config };
+        return new Map([
+          ['brand_name', c.brand_name],
+          ['search_placeholder', c.search_placeholder],
+          ['banner_title', c.banner_title],
+          ['banner_subtitle', c.banner_subtitle]
+        ]);
+      }
+    });
+
+    // Mobile menu toggle
+    document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+      document.getElementById('mobile-nav').classList.toggle('hidden');
+    });
+
+    // Countdown timer
+    let totalSeconds = 2 * 3600 + 15 * 60 + 33;
+    function updateCountdown() {
+      const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+      const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+      const s = String(totalSeconds % 60).padStart(2, '0');
+      const spans = document.querySelectorAll('#countdown span.bg-pastel-dark');
+      if (spans.length === 3) {
+        spans[0].textContent = h;
+        spans[1].textContent = m;
+        spans[2].textContent = s;
+      }
+      if (totalSeconds > 0) totalSeconds--;
+    }
+    setInterval(updateCountdown, 1000);
+
+    // Add to cart interaction
+    document.querySelectorAll('.btn-primary').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.textContent = '✓ Đã thêm';
+        setTimeout(() => { btn.innerHTML = 'Mua ngay <span class="ml-1">→</span>'; }, 1500);
+      });
+    });
+
+    // Heart toggle
+    document.querySelectorAll('[data-lucide="heart"]').forEach(icon => {
+      icon.closest('button').addEventListener('click', function() {
+        const i = this.querySelector('i');
+        if (i.style.fill === 'rgb(222, 111, 161)') {
+          i.style.fill = 'none';
+        } else {
+          i.style.fill = '#DE6FA1';
+        }
+      });
+    });
+
+    lucide.createIcons();
+  </script>
+  <script>
+    // Login functions
+    function openLoginModal() {
+      document.getElementById('login-modal').classList.remove('hidden');
+    }
+
+    function closeLoginModal() {
+      document.getElementById('login-modal').classList.add('hidden');
+      document.getElementById('login-email').value = '';
+      document.getElementById('login-password').value = '';
+    }
+
+    function handleLogin() {
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+
+      if (!email || !password) {
+        showToast('Vui lòng nhập email và mật khẩu!');
+        return;
+      }
+
+      // Simulate login
+      showToast(`Đăng nhập thành công! (${email})`);
+      closeLoginModal();
+      localStorage.setItem('user', JSON.stringify({ email, name: email.split('@')[0] }));
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('user');
+      showToast('Đã đăng xuất!');
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-text').textContent = message;
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3000);
+    }
+
+    // Lucide update
+    lucide.createIcons();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9f79dcbce2c284bd',t:'MTc3ODA5MDE5My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

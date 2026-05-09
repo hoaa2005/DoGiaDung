@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auth Design</title>
+
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+     background: linear-gradient(135deg, #fff7fa 0%, #ffeef5 50%, #ffe4ee 100%);
+    }
+
+    .auth-container {
+      height: 100%;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      gap: 40px;
+    }
+
+    /* ===== LOGO ===== */
+    .brand-header {
+      font-size: 56px;
+      font-weight: 900;
+background: linear-gradient(135deg, #f9a8d4 0%, #f472b6 100%);
+
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+
+      text-align: center;
+      letter-spacing: 2px;
+
+      animation: fadeInDown 0.6s ease;
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ===== CARD ===== */
+    .auth-card {
+      background: rgba(255, 255, 255, 0.95);
+
+      border-radius: 24px;
+
+      box-shadow: 0 10px 35px rgba(244, 114, 182, 0.12);
+
+      width: 100%;
+      max-width: 500px;
+
+      padding: 60px 50px;
+
+      backdrop-filter: blur(10px);
+    }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    /* ===== TIÊU ĐỀ ===== */
+    .auth-header h1 {
+      font-size: 32px;
+      font-weight: 700;
+
+      background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+
+      margin-bottom: 10px;
+    }
+
+    .brand-title {
+      font-size: 28px;
+      font-weight: 800;
+
+      color: #db2777;
+
+      text-align: center;
+      margin-bottom: 30px;
+      letter-spacing: 1px;
+    }
+
+    .auth-header p {
+      color: #9d174d;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+
+      color: #831843;
+
+      font-size: 14px;
+      font-weight: 600;
+
+      margin-bottom: 8px;
+
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ===== INPUT ===== */
+    .form-group input {
+      width: 100%;
+
+      padding: 14px 16px;
+
+      border: 2px solid #fce7f3;
+
+      border-radius: 12px;
+
+      font-size: 14px;
+
+      transition: all 0.3s ease;
+
+      background: #fffafd;
+
+      color: #9ca3af;
+    }
+
+    .form-group input:focus {
+      outline: none;
+
+      border-color: #ec4899;
+
+      background: #fff0f6;
+
+      box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.15);
+    }
+
+    .form-group input::placeholder {
+    color: #d1d5db;
+}
+
+    /* ===== BUTTON ===== */
+    .submit-btn {
+      width: 100%;
+
+      padding: 14px;
+
+      background: linear-gradient(135deg, #f9a8d4 0%, #f472b6 100%);
+
+      color: white;
+
+      border: none;
+      border-radius: 12px;
+
+      font-size: 15px;
+      font-weight: 700;
+
+      text-transform: uppercase;
+      letter-spacing: 1px;
+
+      cursor: pointer;
+
+      transition: all 0.3s ease;
+
+      margin-top: 10px;
+
+      box-shadow: 0 8px 20px rgba(244, 114, 182, 0.18);
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+
+      box-shadow: 0 15px 40px rgba(236, 72, 153, 0.4);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+
+      margin: 30px 0;
+
+      gap: 12px;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+
+      flex: 1;
+      height: 1px;
+
+    background: #fbcfe8;
+    }
+
+    .divider span {
+      color: #be185d;
+
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* ===== SOCIAL ===== */
+    .social-login {
+      display: flex;
+      gap: 12px;
+
+      margin-bottom: 25px;
+    }
+
+    .social-btn {
+      flex: 1;
+
+      padding: 12px;
+
+      border: 2px solid #fbcfe8;
+
+      border-radius: 12px;
+
+      background: rgba(255, 240, 245, 0.8);
+
+      cursor: pointer;
+
+      transition: all 0.3s ease;
+
+
+      font-size: 20px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .social-btn:hover {
+      border-color: #ec4899;
+
+      background: #ffe4ec;
+
+      transform: translateY(-2px);
+    }
+
+    .toggle-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .toggle-link a {
+      color: #ec4899;
+
+      text-decoration: none;
+
+      font-weight: 700;
+      font-size: 14px;
+
+      transition: color 0.3s ease;
+
+      cursor: pointer;
+    }
+
+    .toggle-link a:hover {
+      color: #9d174d;
+    }
+
+    .toggle-link span {
+      color: #9d174d;
+      font-weight: 500;
+    }
+
+    .form-container {
+      display: none;
+    }
+
+    .form-container.active {
+      display: block;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+
+      gap: 8px;
+
+      margin-top: 12px;
+      margin-bottom: 20px;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+
+      cursor: pointer;
+
+      accent-color: #ec4899;
+    }
+
+    .checkbox-group label {
+      margin: 0;
+
+      font-size: 13px;
+
+      color: #9d174d;
+
+      cursor: pointer;
+
+      font-weight: 400;
+
+      text-transform: none;
+      letter-spacing: normal;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="auth-container">
+
+  <div class="auth-card">
+
+    <!-- LOGIN -->
+    <div class="form-container active" id="loginForm">
+
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <div class="bg-pink-100 text-pink-700 p-3 rounded mb-4">
+            {% for msg in messages %}
+              <p>{{ msg }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <div class="auth-header">
+        <h1>Đăng Nhập</h1>
+        <p>Chào mừng bạn trở lại</p>
+      </div>
+
+      <div class="divider">
+        <span>ĐĂNG NHẬP</span>
+      </div>
+
+      <form method="POST" action="/login">
+
+        <div class="form-group">
+          <label>Email</label>
+
+          <input type="text"
+                 name="email"
+                 placeholder="your@email.com"
+                 required>
+        </div>
+
+        <div class="form-group">
+          <label>Mật Khẩu</label>
+
+          <input type="password"
+                 name="matKhau"
+                 placeholder="••••••••"
+                 required>
+        </div>
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="remember" name="remember">
+
+          <label for="remember">Ghi nhớ tôi</label>
+        </div>
+
+        <button type="submit" class="submit-btn">
+          Đăng Nhập
+        </button>
+
+      </form>
+
+      <div class="toggle-link">
+        <span>Chưa có tài khoản?</span>
+
+        <a onclick="toggleForms()"> Đăng Ký Ngay</a>
+      </div>
+
+    </div>
+
+    <!-- REGISTER -->
+    <div class="form-container" id="signupForm">
+
+      <div class="auth-header">
+        <h1>Đăng Ký</h1>
+        <p>Tạo tài khoản mới</p>
+      </div>
+
+      <div class="divider">
+        <span>ĐĂNG KÝ</span>
+      </div>
+
+      <form method="POST" action="/register">
+
+        <div class="form-group">
+          <label>Tên Đăng Nhập</label>
+
+          <input type="text"
+                 name="tenDangNhap"
+                 placeholder="Nhập tên đăng nhập"
+                 required>
+        </div>
+
+        <div class="form-group">
+          <label>Họ Và Tên</label>
+
+          <input type="text"
+                 name="hoTen"
+                 placeholder="Nhập tên đầy đủ của bạn"
+                 required>
+        </div>
+
+        <div class="form-group">
+          <label>Email</label>
+
+          <input type="email"
+                 name="email"
+                 placeholder="your@email.com"
+                 required>
+        </div>
+
+        <div class="form-group">
+          <label>Số Điện Thoại</label>
+
+          <input type="tel"
+                 name="soDienThoai"
+                 placeholder="0123 456 789"
+                 required>
+        </div>
+
+        <div class="form-group">
+          <label>Mật Khẩu</label>
+
+          <input type="password"
+                 name="matKhau"
+                 placeholder="Nhập mật khẩu"
+                 required>
+        </div>
+
+        <div class="checkbox-group">
+          <input type="checkbox"
+                 id="terms"
+                 name="terms"
+                 required>
+
+          <label for="terms">
+            Tôi đồng ý với điều khoản sử dụng
+          </label>
+        </div>
+
+        <button type="submit" class="submit-btn">
+          Tạo Tài Khoản
+        </button>
+
+      </form>
+
+      <div class="toggle-link">
+        <span>Đã có tài khoản?</span>
+
+        <a onclick="toggleForms()"> Đăng Nhập Ngay</a>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  function toggleForms() {
+
+    const loginForm = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
+
+    loginForm.classList.toggle('active');
+    signupForm.classList.toggle('active');
+  }
+
+  window.onload = function () {
+
+    const params = new URLSearchParams(window.location.search);
+
+    const form = params.get("form");
+
+    if (form === "register") {
+
+      document.getElementById("loginForm").classList.remove("active");
+
+      document.getElementById("signupForm").classList.add("active");
+    }
+  }
+</script>
+
+</body>
+</html>
