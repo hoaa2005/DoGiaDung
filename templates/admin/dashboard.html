@@ -1,0 +1,259 @@
+{% extends "admin/layout.html" %}
+
+{% block content %}
+<style>
+    :root {
+        --pink-main: #ff4d6d;
+        --pink-light: #fff0f3;
+        --navy-dark: #0f172a;
+        --slate-500: #64748b;
+        --glass-bg: rgba(255, 255, 255, 0.9);
+        --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+    }
+
+    .dashboard-wrapper {
+        padding: 30px;
+        background: #fffafa;
+        min-height: 100vh;
+    }
+
+    /* KPI CARDS */
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+
+    .kpi-card {
+        background: var(--glass-bg);
+        padding: 25px;
+        border-radius: 24px;
+        border: 1px solid #ffffff;
+        box-shadow: var(--card-shadow);
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        transition: transform 0.3s ease;
+    }
+
+    .kpi-card:hover { transform: translateY(-5px); }
+
+    .kpi-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+
+    /* BỐ CỤC BIỂU ĐỒ */
+    .chart-grid {
+        display: grid;
+        grid-template-columns: 1.6fr 1fr;
+        gap: 25px;
+    }
+
+    .glass-card {
+        background: white;
+        border-radius: 28px;
+        padding: 30px;
+        border: 1px solid #f1f5f9;
+        box-shadow: var(--card-shadow);
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .card-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--navy-dark);
+    }
+
+    /* CUSTOM LEGEND */
+    .legend-list {
+        list-style: none;
+        padding: 0;
+        margin-top: 20px;
+    }
+
+    .legend-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #f8fafc;
+        font-size: 13px;
+        font-weight: 600;
+    }
+</style>
+
+<div class="dashboard-wrapper">
+
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background: #fff1f2; color: #ff4d6d;">
+                <i class="fa-solid fa-wallet"></i>
+            </div>
+            <div>
+                <p style="margin:0; color: var(--slate-500); font-size: 13px; font-weight: 700;">DOANH THU</p>
+                <h2 style="margin:5px 0 0; font-size: 24px; font-weight: 800; color: var(--navy-dark);">{{ "{:,.0f}".format(doanh_thu) }}đ</h2>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background: #f0f9ff; color: #0ea5e9;">
+                <i class="fa-solid fa-cart-shopping"></i>
+            </div>
+            <div>
+                <p style="margin:0; color: var(--slate-500); font-size: 13px; font-weight: 700;">ĐƠN HÀNG</p>
+                <h2 style="margin:5px 0 0; font-size: 24px; font-weight: 800; color: var(--navy-dark);">{{ don_hang }}</h2>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background: #f5f3ff; color: #8b5cf6;">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <div>
+                <p style="margin:0; color: var(--slate-500); font-size: 13px; font-weight: 700;">KHÁCH HÀNG</p>
+                <h2 style="margin:5px 0 0; font-size: 24px; font-weight: 800; color: var(--navy-dark);">{{ users }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-grid">
+
+        <div class="glass-card">
+            <div class="card-header">
+                <h3><i class="fa-solid fa-chart-line" style="color: var(--pink-main); margin-right: 10px;"></i>Phân Tích Kinh Doanh</h3>
+                <div style="background: #f1f5f9; padding: 5px; border-radius: 12px;">
+                    <button class="chart-btn active" style="padding: 6px 15px; border:none; border-radius: 8px; background: white; font-weight: 700; font-size: 11px; cursor: pointer;">Tuần này</button>
+                    <button class="chart-btn" style="padding: 6px 15px; border:none; background: transparent; color: var(--slate-500); font-weight: 700; font-size: 11px; cursor: pointer;">Tháng trước</button>
+                </div>
+            </div>
+            <div style="height: 380px;">
+                <canvas id="mainAnalysisChart"></canvas>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <div class="card-header">
+                <h3><i class="fa-solid fa-box-open" style="color: #8b5cf6; margin-right: 10px;"></i>Nguồn Doanh Thu</h3>
+            </div>
+            <div style="height: 240px; position: relative;">
+                <canvas id="categoryDonutChart"></canvas>
+            </div>
+            <ul class="legend-list">
+                <li class="legend-item">
+                    <span><i class="fa-solid fa-circle" style="color: #ff4d6d; font-size: 8px; margin-right: 8px;"></i>Gia dụng điện</span>
+                    <span style="color: var(--navy-dark);">45%</span>
+                </li>
+                <li class="legend-item">
+                    <span><i class="fa-solid fa-circle" style="color: #8b5cf6; font-size: 8px; margin-right: 8px;"></i>Đồ dùng bếp</span>
+                    <span style="color: var(--navy-dark);">30%</span>
+                </li>
+                <li class="legend-item">
+                    <span><i class="fa-solid fa-circle" style="color: #0ea5e9; font-size: 8px; margin-right: 8px;"></i>Trang trí nội thất</span>
+                    <span style="color: var(--navy-dark);">25%</span>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // DATA MOCKUP (Thay thế bằng dữ liệu thực từ Flask)
+    const labels = JSON.parse('{{ labels_line | tojson | safe }}');
+    const revenueData = JSON.parse('{{ data_line | tojson | safe }}');
+    const orderData = revenueData.map(v => Math.floor(v / 200000) + 5);
+
+    // MIXED CHART (BAR + LINE)
+    const ctxMain = document.getElementById('mainAnalysisChart').getContext('2d');
+    const gradient = ctxMain.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(255, 77, 109, 0.2)');
+    gradient.addColorStop(1, 'rgba(255, 77, 109, 0.0)');
+
+    new Chart(ctxMain, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Đơn hàng',
+                    data: orderData,
+                    backgroundColor: '#e2e8f0',
+                    borderRadius: 10,
+                    order: 2,
+                    yAxisID: 'yOrders'
+                },
+                {
+                    label: 'Doanh thu',
+                    data: revenueData,
+                    type: 'line',
+                    borderColor: '#ff4d6d',
+                    borderWidth: 4,
+                    fill: true,
+                    backgroundColor: gradient,
+                    tension: 0.4,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#ff4d6d',
+                    pointBorderWidth: 3,
+                    pointRadius: 6,
+                    order: 1,
+                    yAxisID: 'yRevenue'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                yRevenue: {
+                    position: 'left',
+                    grid: { color: '#f1f5f9', drawBorder: false },
+                    ticks: { callback: v => v.toLocaleString() + 'đ', font: { size: 11, weight: '600' } }
+                },
+                yOrders: {
+                    position: 'right',
+                    grid: { display: false },
+                    ticks: { font: { size: 11, weight: '600' } }
+                },
+                x: { grid: { display: false }, ticks: { font: { size: 11, weight: '600' } } }
+            }
+        }
+    });
+
+    // DONUT CHART
+    const ctxDonut = document.getElementById('categoryDonutChart').getContext('2d');
+    new Chart(ctxDonut, {
+        type: 'doughnut',
+        data: {
+            labels: ['Điện', 'Bếp', 'Nội thất'],
+            datasets: [{
+                data: [45, 30, 25],
+                backgroundColor: ['#ff4d6d', '#8b5cf6', '#0ea5e9'],
+                hoverOffset: 15,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            cutout: '82%',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } }
+        }
+    });
+</script>
+{% endblock %}

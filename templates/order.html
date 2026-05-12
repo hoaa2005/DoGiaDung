@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DGD Admin - Quản lý đơn hàng</title>
+    <!-- Font & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --pink-bright: #ff4d6d;
+            --pink-soft: #fff0f3;
+            --sidebar-bg: #ffffff;
+            --text-main: #2d3436;
+            --text-sub: #7d8597;
+            --bg-body: #fffafa;
+            /* Status Colors */
+            --status-pending: #fdcb6e;
+            --status-shipping: #0984e3;
+            --status-success: #00b894;
+            --status-cancel: #d63031;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-body);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* --- SIDEBAR (Giữ nguyên cấu trúc nav bạn yêu cầu) --- */
+        .sidebar {
+            width: 300px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid #fce4ec;
+            padding: 40px 25px;
+            position: fixed;
+            height: 100vh;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand { display: flex; align-items: center; gap: 15px; margin-bottom: 50px; }
+        .brand span { font-size: 36px; font-weight: 800; color: var(--pink-bright); letter-spacing: 2px; }
+
+        .nav-menu { flex: 1; list-style: none; padding: 0; margin: 0; }
+        .nav-item {
+            display: flex; align-items: center; padding: 16px 22px; color: var(--text-sub);
+            text-decoration: none; border-radius: 18px; margin-bottom: 8px; font-weight: 600; transition: 0.3s;
+        }
+        .nav-item i { width: 35px; font-size: 20px; }
+
+        /* Highlight đúng mục Đơn hàng */
+        .nav-item.active {
+            background: var(--pink-soft);
+            color: var(--pink-bright);
+            box-shadow: 0 10px 20px rgba(255, 77, 109, 0.1);
+        }
+
+        /* --- MAIN CONTENT & TOP BAR --- */
+        .main { margin-left: 300px; flex: 1; padding: 40px; }
+
+        .header-box {
+            background: white; padding: 20px 35px; border-radius: 25px;
+            display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid #fce4ec; margin-bottom: 30px;
+        }
+
+        .header-right { display: flex; align-items: center; gap: 20px; }
+        .user-profile { display: flex; align-items: center; gap: 12px; padding-right: 20px; border-right: 2px solid #f1f2f6; }
+        .user-profile img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--pink-bright); }
+
+        .btn-logout-top {
+            width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;
+            background: white; color: var(--pink-bright); border-radius: 15px; text-decoration: none;
+            box-shadow: 0 5px 15px rgba(255, 77, 109, 0.1); transition: 0.4s; border: 1px solid #fce4ec;
+        }
+        .btn-logout-top:hover { background: var(--pink-bright); color: white; transform: rotate(90deg); }
+
+        /* --- ORDER SPECIFIC DESIGN --- */
+        .order-filters {
+            display: flex; gap: 15px; margin-bottom: 25px;
+        }
+
+        .filter-chip {
+            padding: 10px 20px; background: white; border: 1px solid #fce4ec;
+            border-radius: 50px; font-weight: 600; color: var(--text-sub); cursor: pointer; transition: 0.3s;
+        }
+        .filter-chip.active { background: var(--pink-bright); color: white; border-color: var(--pink-bright); }
+
+        .order-container {
+            background: white; border-radius: 30px; border: 1px solid #fce4ec; overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.02);
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #fffafa; text-align: left; padding: 20px; color: var(--text-sub); font-size: 13px; }
+        td { padding: 20px; border-bottom: 1px solid #f9f9f9; color: var(--text-main); font-weight: 600; }
+
+        .order-id { color: var(--pink-bright); font-weight: 800; }
+
+        .status-badge {
+            padding: 6px 15px; border-radius: 12px; font-size: 12px; font-weight: 700;
+            display: inline-block;
+        }
+        .pending { background: #fff9eb; color: var(--status-pending); }
+        .shipping { background: #e8f4fd; color: var(--status-shipping); }
+        .success { background: #e6fffb; color: var(--status-success); }
+
+        .btn-view {
+            background: #f1f2f6; color: var(--text-main); padding: 8px 15px;
+            border-radius: 10px; text-decoration: none; font-size: 13px; transition: 0.3s;
+        }
+        .btn-view:hover { background: var(--pink-soft); color: var(--pink-bright); }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="brand">
+            <i class="fa-solid fa-gem" style="color: var(--pink-bright); font-size: 30px;"></i>
+            <span>DGD</span>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="dashboard.html" class="nav-item">
+                <i class="fa-solid fa-chart-pie"></i> Thống kê
+            </a>
+            <a href="acount.html" class="nav-item">
+                <i class="fa-solid fa-user-gear"></i> Tài khoản
+            </a>
+            <a href="products.html" class="nav-item">
+                <i class="fa-solid fa-kitchen-set"></i> Sản phẩm
+            </a>
+            <a href="order.html" class="nav-item active">
+                <i class="fa-solid fa-file-invoice-dollar"></i> Đơn hàng
+            </a>
+            <a href="supplier.html" class="nav-item">
+                <i class="fa-solid fa-truck-ramp-box"></i> Nhà cung cấp
+            </a>
+            <a href="warehouse.html" class="nav-item">
+                <i class="fa-solid fa-boxes-stacked"></i> Kho hàng
+            </a>
+
+            <a href="/logout" class="nav-item" style="margin-top: auto; color: #ff7675;">
+                <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+            </a>
+        </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main">
+        <header class="header-box">
+            <div class="header-left">
+                <h1 style="margin: 0; font-size: 24px;">Danh sách đơn hàng</h1>
+            </div>
+
+            <div class="header-right">
+                <div class="user-profile">
+                    <div style="text-align: right; margin-right: 10px;">
+                        <span style="display: block; font-weight: 700;">Admin DGD 🎀</span>
+                        <small style="color: var(--text-sub);">Quản trị viên</small>
+                    </div>
+                    <img src="https://i.pravatar.cc/100?img=47" alt="Avatar">
+                </div>
+                <a href="/logout" class="btn-logout-top">
+                    <i class="fa-solid fa-power-off"></i>
+                </a>
+            </div>
+        </header>
+
+        <!-- ORDER FILTERS -->
+        <div class="order-filters">
+            <div class="filter-chip active">Tất cả</div>
+            <div class="filter-chip">Chờ xử lý</div>
+            <div class="filter-chip">Đang giao</div>
+            <div class="filter-chip">Hoàn thành</div>
+        </div>
+
+        <!-- ORDER TABLE -->
+        <div class="order-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>MÃ ĐƠN</th>
+                        <th>KHÁCH HÀNG</th>
+                        <th>NGÀY ĐẶT</th>
+                        <th>TỔNG TIỀN</th>
+                        <th>TRẠNG THÁI</th>
+                        <th>HÀNH ĐỘNG</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="order-id">#DGD-8801</span></td>
+                        <td>Nguyễn Văn A</td>
+                        <td>12/10/2023</td>
+                        <td>2.450.000đ</td>
+                        <td><span class="status-badge pending">Chờ xử lý</span></td>
+                        <td><a href="#" class="btn-view">Chi tiết</a></td>
+                    </tr>
+                    <tr>
+                        <td><span class="order-id">#DGD-8802</span></td>
+                        <td>Trần Thị B</td>
+                        <td>11/10/2023</td>
+                        <td>890.000đ</td>
+                        <td><span class="status-badge shipping">Đang giao</span></td>
+                        <td><a href="#" class="btn-view">Chi tiết</a></td>
+                    </tr>
+                    <tr>
+                        <td><span class="order-id">#DGD-8803</span></td>
+                        <td>Lê Minh C</td>
+                        <td>10/10/2023</td>
+                        <td>5.200.000đ</td>
+                        <td><span class="status-badge success">Hoàn thành</span></td>
+                        <td><a href="#" class="btn-view">Chi tiết</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+</body>
+</html>

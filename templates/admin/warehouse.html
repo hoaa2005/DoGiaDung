@@ -1,0 +1,88 @@
+{% extends "admin/layout.html" %}
+{% block content %}
+<div style="padding: 30px; font-family: 'Plus Jakarta Sans', sans-serif;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div>
+            <h2 style="font-weight: 800; margin: 0; color: #0f172a;">KIỂM SOÁT KHO HÀNG</h2>
+            <p style="color: #64748b; margin: 5px 0 0 0;">Dữ liệu dựa trên bảng <code style="background:#eee; padding:2px 5px;">ton_kho</code> & <code style="background:#eee; padding:2px 5px;">lich_su_kho</code></p>
+        </div>
+    </div>
+
+    <div style="background: white; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); overflow: hidden; border: 1px solid #f1f5f9;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f8fafc; text-align: left;">
+                    <th style="padding: 20px; font-size: 12px; color: #64748b;">MÃ SP</th>
+                    <th style="padding: 20px; font-size: 12px; color: #64748b;">TÊN SẢN PHẨM</th>
+                    <th style="padding: 20px; font-size: 12px; color: #64748b;">DANH MỤC</th>
+                    <th style="padding: 20px; font-size: 12px; color: #64748b;">SỐ LƯỢNG</th>
+                    <th style="padding: 20px; font-size: 12px; color: #64748b;">CẬP NHẬT CUỐI</th>
+                    <th style="padding: 20px; font-size: 12px; color: #64748b; text-align:center;">THAO TÁC</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 20px; font-weight: 700;">#SP{{ item.id }}</td>
+                    <td style="padding: 20px; font-weight: 700; color: #0f172a;">{{ item.tenSanPham }}</td>
+                    <td style="padding: 20px; color: #64748b;">{{ item.tenDanhMuc }}</td>
+                    <td style="padding: 20px;">
+                        <span style="font-size: 18px; font-weight: 800; {% if item.soLuong < 10 %}color: #ef4444;{% endif %}">
+                            {{ item.soLuong }}
+                        </span>
+                        {% if item.soLuong < 10 %}
+                            <i class="fa-solid fa-triangle-exclamation" style="color: #f59e0b; margin-left: 5px;" title="Sắp hết hàng!"></i>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 20px; font-size: 12px; color: #94a3b8;">{{ item.ngayCapNhat }}</td>
+                    <td style="padding: 20px; text-align: center;">
+                        <button onclick="showAdjustModal('{{ item.id }}', '{{ item.tenSanPham }}')"
+                                style="background: #f1f5f9; border: none; padding: 10px 15px; border-radius: 10px; font-weight: 700; color: #0f172a; cursor: pointer; transition: 0.2s;">
+                            <i class="fa-solid fa-arrow-up-9-1"></i> Điều chỉnh
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="modalAdjust" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.7); z-index:9999; align-items:center; justify-content:center; backdrop-filter: blur(4px);">
+    <div style="background:white; width:400px; padding:30px; border-radius:24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
+        <h3 id="modalName" style="margin: 0 0 20px 0; font-weight: 800;">Điều chỉnh tồn kho</h3>
+        <form action="/admin/warehouse/update" method="POST">
+            <input type="hidden" name="sanPhamId" id="modalId">
+
+            <div style="margin-bottom: 20px;">
+                <label style="display:block; font-size:12px; font-weight:800; color:#64748b; margin-bottom:8px;">SỐ LƯỢNG THAY ĐỔI</label>
+                <input type="number" name="soLuong" placeholder="Ví dụ: 10 hoặc -5" required
+                       style="width:100%; padding:12px; border-radius:12px; border:1.5px solid #e2e8f0; font-weight:700; font-size:16px; outline:none;">
+                <small style="color:#94a3b8;">Nhập số dương (+) để nhập, số âm (-) để xuất.</small>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <label style="display:block; font-size:12px; font-weight:800; color:#64748b; margin-bottom:8px;">GHI CHÚ (ghiChu)</label>
+                <textarea name="ghiChu" rows="3" style="width:100%; padding:12px; border-radius:12px; border:1.5px solid #e2e8f0; outline:none; font-family:inherit;"></textarea>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" style="flex: 1; background: #ff4d6d; color: white; border: none; padding: 12px; border-radius: 12px; font-weight: 800; cursor: pointer;">XÁC NHẬN</button>
+                <button type="button" onclick="closeModal()" style="flex: 1; background: #f1f5f9; color: #64748b; border: none; padding: 12px; border-radius: 12px; font-weight: 800; cursor: pointer;">HỦY</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function showAdjustModal(id, name) {
+        document.getElementById('modalId').value = id;
+        document.getElementById('modalName').innerText = name;
+        document.getElementById('modalAdjust').style.display = 'flex';
+    }
+    function closeModal() {
+        document.getElementById('modalAdjust').style.display = 'none';
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DGD Admin - Quản lý nhà cung cấp</title>
+    <!-- Font & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --pink-bright: #ff4d6d;
+            --pink-soft: #fff0f3;
+            --sidebar-bg: #ffffff;
+            --text-main: #2d3436;
+            --text-sub: #7d8597;
+            --bg-body: #fffafa;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-body);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 300px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid #fce4ec;
+            padding: 40px 25px;
+            position: fixed;
+            height: 100vh;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand { display: flex; align-items: center; gap: 15px; margin-bottom: 50px; }
+        .brand span { font-size: 36px; font-weight: 800; color: var(--pink-bright); letter-spacing: 2px; }
+
+        .nav-menu { flex: 1; list-style: none; padding: 0; margin: 0; }
+        .nav-item {
+            display: flex; align-items: center; padding: 16px 22px; color: var(--text-sub);
+            text-decoration: none; border-radius: 18px; margin-bottom: 8px; font-weight: 600; transition: 0.3s;
+        }
+        .nav-item i { width: 35px; font-size: 20px; }
+
+        /* Highlight trang Nhà cung cấp */
+        .nav-item.active {
+            background: var(--pink-soft);
+            color: var(--pink-bright);
+            box-shadow: 0 10px 20px rgba(255, 77, 109, 0.1);
+        }
+
+        /* --- TOP BAR (Giữ nguyên chỗ đăng nhập/đăng xuất) --- */
+        .main { margin-left: 300px; flex: 1; padding: 40px; }
+
+        .header-box {
+            background: white; padding: 20px 35px; border-radius: 25px;
+            display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid #fce4ec; margin-bottom: 30px;
+        }
+
+        .header-right { display: flex; align-items: center; gap: 20px; }
+        .user-profile { display: flex; align-items: center; gap: 12px; padding-right: 20px; border-right: 2px solid #f1f2f6; }
+        .user-profile img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--pink-bright); }
+
+        .btn-logout-top {
+            width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;
+            background: white; color: var(--pink-bright); border-radius: 15px; text-decoration: none;
+            box-shadow: 0 5px 15px rgba(255, 77, 109, 0.1); transition: 0.4s; border: 1px solid #fce4ec;
+        }
+        .btn-logout-top:hover { background: var(--pink-bright); color: white; transform: rotate(90deg); }
+
+        /* --- SUPPLIER CONTENT --- */
+        .supplier-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .supplier-card {
+            background: white;
+            border-radius: 25px;
+            padding: 25px;
+            border: 1px solid #fce4ec;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .supplier-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(255, 77, 109, 0.1);
+        }
+
+        .supplier-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .supplier-logo {
+            width: 60px;
+            height: 60px;
+            background: var(--pink-soft);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--pink-bright);
+            font-size: 24px;
+        }
+
+        .supplier-info h3 { margin: 0; color: var(--text-main); font-size: 18px; }
+        .supplier-info p { margin: 5px 0 0; color: var(--text-sub); font-size: 13px; }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: var(--text-main);
+        }
+
+        .contact-item i { color: var(--pink-bright); width: 20px; }
+
+        .tag {
+            display: inline-block;
+            padding: 5px 12px;
+            background: #f1f2f6;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="brand">
+            <i class="fa-solid fa-gem" style="color: var(--pink-bright); font-size: 30px;"></i>
+            <span>DGD</span>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="dashboard.html" class="nav-item">
+                <i class="fa-solid fa-chart-pie"></i> Thống kê
+            </a>
+            <a href="acount.html" class="nav-item">
+                <i class="fa-solid fa-user-gear"></i> Tài khoản
+            </a>
+            <a href="products.html" class="nav-item">
+                <i class="fa-solid fa-kitchen-set"></i> Sản phẩm
+            </a>
+            <a href="order.html" class="nav-item">
+                <i class="fa-solid fa-file-invoice-dollar"></i> Đơn hàng
+            </a>
+            <a href="supplier.html" class="nav-item active">
+                <i class="fa-solid fa-truck-ramp-box"></i> Nhà cung cấp
+            </a>
+            <a href="warehouse.html" class="nav-item">
+                <i class="fa-solid fa-boxes-stacked"></i> Kho hàng
+            </a>
+
+            <!-- Đăng xuất Sidebar -->
+            <a href="/logout" class="nav-item" style="margin-top: auto; color: #ff7675;">
+                <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+            </a>
+        </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main">
+        <header class="header-box">
+            <div class="header-left">
+                <h1 style="margin: 0; font-size: 24px;">Hợp tác Nhà cung cấp</h1>
+            </div>
+
+            <div class="header-right">
+                <div class="user-profile">
+                    <div style="text-align: right; margin-right: 10px;">
+                        <span style="display: block; font-weight: 700;">Admin DGD 🎀</span>
+                        <small style="color: var(--text-sub);">Quản trị viên</small>
+                    </div>
+                    <img src="https://i.pravatar.cc/100?img=47" alt="Avatar">
+                </div>
+                <a href="/logout" class="btn-logout-top">
+                    <i class="fa-solid fa-power-off"></i>
+                </a>
+            </div>
+        </header>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="color: var(--text-main); margin: 0;">Danh sách đối tác</h2>
+            <button style="background: var(--pink-bright); color: white; border: none; padding: 12px 25px; border-radius: 15px; font-weight: 700; cursor: pointer;">
+                + Thêm đối tác mới
+            </button>
+        </div>
+
+        <!-- SUPPLIER GRID -->
+        <div class="supplier-grid">
+            <!-- NCC 1 -->
+            <div class="supplier-card">
+                <div class="supplier-header">
+                    <div class="supplier-logo"><i class="fa-solid fa-faucet-drip"></i></div>
+                    <div class="supplier-info">
+                        <h3>Sunhouse Group</h3>
+                        <p>ID: NCC-001</p>
+                    </div>
+                </div>
+                <div class="contact-item"><i class="fa-solid fa-phone"></i> 024.3736.66xx</div>
+                <div class="contact-item"><i class="fa-solid fa-envelope"></i> contact@sunhouse.com.vn</div>
+                <div class="contact-item"><i class="fa-solid fa-location-dot"></i> Cầu Giấy, Hà Nội</div>
+                <span class="tag">Đồ dùng nhà bếp</span>
+            </div>
+
+            <!-- NCC 2 -->
+            <div class="supplier-card">
+                <div class="supplier-header">
+                    <div class="supplier-logo"><i class="fa-solid fa-bolt"></i></div>
+                    <div class="supplier-info">
+                        <h3>Điện máy Karofi</h3>
+                        <p>ID: NCC-002</p>
+                    </div>
+                </div>
+                <div class="contact-item"><i class="fa-solid fa-phone"></i> 1900 64xx</div>
+                <div class="contact-item"><i class="fa-solid fa-envelope"></i> info@karofi.com</div>
+                <div class="contact-item"><i class="fa-solid fa-location-dot"></i> Hà Đông, Hà Nội</div>
+                <span class="tag">Máy lọc nước</span>
+            </div>
+
+            <!-- NCC 3 -->
+            <div class="supplier-card">
+                <div class="supplier-header">
+                    <div class="supplier-logo"><i class="fa-solid fa-blender"></i></div>
+                    <div class="supplier-info">
+                        <h3>Lock&Lock Việt Nam</h3>
+                        <p>ID: NCC-003</p>
+                    </div>
+                </div>
+                <div class="contact-item"><i class="fa-solid fa-phone"></i> 028.5413.57xx</div>
+                <div class="contact-item"><i class="fa-solid fa-envelope"></i> sales@locknlock.com</div>
+                <div class="contact-item"><i class="fa-solid fa-location-dot"></i> Quận 7, TP.HCM</div>
+                <span class="tag">Gia dụng cao cấp</span>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

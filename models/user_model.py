@@ -1,6 +1,6 @@
 import sqlite3
 import os
-
+DB_NAME = "database/database.db"
 # ==============================
 # ĐƯỜNG DẪN DATABASE (QUAN TRỌNG)
 # ==============================
@@ -56,7 +56,87 @@ def create_user(tenDangNhap, matKhau, hoTen, email, soDienThoai):
     conn.commit()
     conn.close()
 
+def get_all_users():
 
+    conn = sqlite3.connect(DB_NAME)
+    conn.row_factory = sqlite3.Row
+
+    users = conn.execute("""
+        SELECT * FROM nguoi_dung
+        ORDER BY id DESC
+    """).fetchall()
+
+    conn.close()
+
+    return users
+
+
+# =========================
+# GET USER BY ID
+# =========================
+def get_user_by_id(user_id):
+
+    conn = sqlite3.connect(DB_NAME)
+    conn.row_factory = sqlite3.Row
+
+    user = conn.execute("""
+        SELECT * FROM nguoi_dung
+        WHERE id = ?
+    """, (user_id,)).fetchone()
+
+    conn.close()
+
+    return user
+
+
+# =========================
+# DELETE USER
+# =========================
+def delete_user(user_id):
+
+    conn = sqlite3.connect(DB_NAME)
+
+    conn.execute("""
+        DELETE FROM nguoi_dung
+        WHERE id = ?
+    """, (user_id,))
+
+    conn.commit()
+    conn.close()
+
+
+# =========================
+# LOCK USER
+# =========================
+def lock_user(user_id):
+
+    conn = sqlite3.connect(DB_NAME)
+
+    conn.execute("""
+        UPDATE nguoi_dung
+        SET trangThai = 0
+        WHERE id = ?
+    """, (user_id,))
+
+    conn.commit()
+    conn.close()
+
+
+# =========================
+# UNLOCK USER
+# =========================
+def unlock_user(user_id):
+
+    conn = sqlite3.connect(DB_NAME)
+
+    conn.execute("""
+        UPDATE nguoi_dung
+        SET trangThai = 1
+        WHERE id = ?
+    """, (user_id,))
+
+    conn.commit()
+    conn.close()
 # ==============================
 # DEBUG (kiểm tra DB đang dùng)
 # ==============================

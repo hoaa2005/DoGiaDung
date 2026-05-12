@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DGD Admin - Premium Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --pink-bright: #ff4d6d;
+            --pink-soft: #fff0f3;
+            --pink-gradient: linear-gradient(135deg, #ff4d6d 0%, #ff85a1 100%);
+            --sidebar-bg: #ffffff;
+            --shadow-glow: 0 10px 30px rgba(255, 77, 109, 0.2);
+            --text-main: #2d3436;
+            --text-sub: #7d8597;
+        }
+
+        body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fffafa; display: flex; min-height: 100vh; }
+
+        /* SIDEBAR */
+        .sidebar { width: 300px; background: var(--sidebar-bg); border-right: 1px solid #fce4ec; padding: 40px 25px; position: fixed; height: 100vh; box-sizing: border-box; display: flex; flex-direction: column; z-index: 100; }
+        .brand { display: flex; align-items: center; gap: 15px; margin-bottom: 50px; padding-left: 10px; }
+        .brand i { color: var(--pink-bright); font-size: 30px; filter: drop-shadow(0 2px 5px rgba(255,77,109,0.4)); }
+        .brand span { font-size: 32px; font-weight: 800; color: var(--pink-bright); letter-spacing: 2px; }
+
+        .nav-menu { flex: 1; list-style: none; padding: 0; margin: 0; overflow-y: auto; }
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .nav-menu::-webkit-scrollbar { display: none; }
+
+        .nav-item { display: flex; align-items: center; padding: 16px 22px; color: var(--text-sub); text-decoration: none; border-radius: 18px; margin-bottom: 8px; transition: 0.3s all ease; font-size: 15px; font-weight: 600; }
+        .nav-item i { width: 30px; font-size: 18px; }
+        .nav-item:hover, .nav-item.active { background: var(--pink-soft); color: var(--pink-bright); }
+        .nav-item.active { background: white; box-shadow: 0 10px 20px rgba(255, 77, 109, 0.1); border: 1px solid var(--pink-soft); }
+
+        .logout-sidebar { margin-top: auto; color: #ff7675 !important; border-top: 1px solid #fff0f3; padding-top: 20px; }
+
+        /* MAIN CONTENT */
+        .main { margin-left: 300px; flex: 1; padding: 40px; box-sizing: border-box; }
+
+        /* TOP BAR */
+        .header-box { background: white; padding: 20px 35px; border-radius: 25px; box-shadow: 0 5px 20px rgba(0,0,0,0.02); margin-bottom: 40px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #fce4ec; }
+        .header-left h1 { margin: 0; font-size: 24px; font-weight: 800; color: var(--text-main); }
+
+        .user-profile { display: flex; align-items: center; gap: 12px; border-right: 2px solid #f1f2f6; padding-right: 20px; }
+        .user-profile img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--pink-bright); padding: 2px; }
+
+        .btn-logout-top { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; background: white; color: var(--pink-bright); border-radius: 15px; text-decoration: none; box-shadow: 0 5px 15px rgba(255, 77, 109, 0.1); border: 1px solid #fce4ec; transition: 0.4s; }
+        .btn-logout-top:hover { background: var(--pink-bright); color: white; transform: rotate(90deg); }
+
+        .content-body { width: 100%; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="brand">
+            <i class="fa-solid fa-gem"></i>
+            <span>DGD</span>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="/admin" class="nav-item {% if request.path == '/admin' %}active{% endif %}">
+                <i class="fa-solid fa-chart-pie"></i><span>Thống kê</span>
+            </a>
+
+            <a href="/admin/account" class="nav-item {% if '/admin/account' in request.path %}active{% endif %}">
+                <i class="fa-solid fa-user-gear"></i><span>Tài khoản</span>
+            </a>
+
+            <a href="/admin/products" class="nav-item {% if '/admin/products' in request.path %}active{% endif %}">
+                <i class="fa-solid fa-kitchen-set"></i><span>Sản phẩm</span>
+            </a>
+
+            <a href="/admin/orders" class="nav-item {% if '/admin/orders' in request.path %}active{% endif %}">
+                <i class="fa-solid fa-file-invoice-dollar"></i><span>Đơn hàng</span>
+            </a>
+
+            <a href="/admin/suppliers" class="nav-item {% if '/admin/suppliers' in request.path %}active{% endif %}">
+                <i class="fa-solid fa-truck-ramp-box"></i><span>Nhà cung cấp</span>
+            </a>
+
+            <a href="/admin/warehouse" class="nav-item {% if '/admin/warehouse' in request.path %}active{% endif %}">
+                <i class="fa-solid fa-boxes-stacked"></i><span>Kho hàng</span>
+            </a>
+            <a href="/admin/categories" class="nav-item {% if '/admin/categories' in request.path %}active{% endif %}">
+                <i class="fa-solid fa-layer-group"></i><span>Danh mục</span>
+            </a>
+
+            <a href="/admin/promotions" class="nav-item {% if '/admin/promotions' in request.path %}active{% endif %}">
+                <i class="fa-solid fa-tags"></i><span>Khuyến mãi</span>
+            </a>
+
+            <a href="/admin/payments" class="nav-item {% if '/admin/payments' in request.path %}active{% endif %}">
+                <i class="fa-solid fa-credit-card"></i><span>Thanh toán</span>
+            </a>
+
+            <a href="/admin/logs" class="nav-item {% if '/admin/logs' in request.path %}active{% endif %}">
+                <i class="fa-solid fa-clock-rotate-left"></i><span>Nhật ký</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="/logout" class="nav-item logout-sidebar">
+                <i class="fa-solid fa-right-from-bracket"></i><span>Đăng xuất</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="header-box">
+            <div class="header-left">
+                {% block header_title %}<h1>Bảng điều khiển</h1>{% endblock %}
+            </div>
+
+            <div class="header-right" style="display: flex; align-items: center; gap: 20px;">
+                <div class="user-profile">
+                    <div style="text-align: right;">
+                        <span style="display:block; font-weight:700; color: var(--text-main);">Admin DGD 🎀</span>
+                        <small style="color:var(--text-sub);">Quản trị viên</small>
+                    </div>
+                    <img src="https://i.pravatar.cc/100?img=47" alt="Avatar">
+                </div>
+                <a href="/logout" class="btn-logout-top" title="Đăng xuất">
+                    <i class="fa-solid fa-power-off"></i>
+                </a>
+            </div>
+        </header>
+
+        <div class="content-body">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+</body>
+</html>
