@@ -3,7 +3,7 @@ from models.account_model import *
 import re
 
 # =========================
-# HIỂN THỊ
+# HIỂN THỊ TRANG TÀI KHOẢN
 # =========================
 def account_page():
 
@@ -13,6 +13,7 @@ def account_page():
         "admin/account.html",
         users=users
     )
+
 
 # =========================
 # XOÁ USER
@@ -25,27 +26,66 @@ def delete_account(id):
 
     return redirect("/admin/accounts")
 
+
 # =========================
 # UPDATE USER
 # =========================
 def edit_account(id):
 
     hoTen = request.form.get("hoTen", "").strip()
+
     email = request.form.get("email", "").strip()
+
+    tenDangNhap = request.form.get("tenDangNhap", "").strip()
+
     vaiTro = request.form.get("vaiTro")
-    trangThai = request.form.get("trangThai")
 
-    # VALIDATE
-    if not hoTen or not email:
-        flash("Không được để trống")
+    matKhau = request.form.get("matKhau", "").strip()
+
+    # GIỮ MẶC ĐỊNH HOẠT ĐỘNG
+    trangThai = 1
+
+
+    # =========================
+    # VALIDATE RỖNG
+    # =========================
+    if not hoTen or not email or not tenDangNhap:
+
+        flash("Không được để trống dữ liệu")
+
         return redirect("/admin/accounts")
 
+
+    # =========================
+    # VALIDATE EMAIL
+    # =========================
     if not re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
+
         flash("Email không hợp lệ")
+
         return redirect("/admin/accounts")
 
-    update_user(id, hoTen, email, vaiTro, trangThai)
 
-    flash("Cập nhật thành công")
+    # =========================
+    # UPDATE DATABASE
+    # =========================
+    try:
+
+        update_user(
+            id=id,
+            hoTen=hoTen,
+            email=email,
+            tenDangNhap=tenDangNhap,
+            vaiTro=vaiTro,
+            trangThai=trangThai,
+            matKhau=matKhau
+        )
+
+        flash("Cập nhật tài khoản thành công")
+
+    except Exception as e:
+
+        flash(f"Lỗi cập nhật: {str(e)}")
+
 
     return redirect("/admin/accounts")

@@ -8,7 +8,7 @@ import re
 
 
 # =============================
-# LOGIN
+# LOGIN (ĐÃ CẬP NHẬT HIỂN THỊ HỌ TÊN)
 # =============================
 def login():
     email = request.form.get("email", "").strip()
@@ -36,8 +36,12 @@ def login():
         flash("Tài khoản đã bị khóa")
         return redirect("/auth")
 
+    # Gán các giá trị cốt lõi vào hệ thống Session
     session["user_id"] = user["id"]
     session["vaiTro"] = user["vaiTro"]
+
+    # CẬP NHẬT QUAN TRỌNG: Lấy chính xác trường hoTen từ database để đẩy lên Header
+    session["hoTen"] = user["hoTen"]
 
     flash("Đăng nhập thành công!")
 
@@ -50,7 +54,7 @@ def login():
 
 
 # =============================
-# REGISTER
+# REGISTER (GIỮ NGUYÊN)
 # =============================
 def register():
     tenDangNhap = request.form.get("tenDangNhap", "").strip()
@@ -108,3 +112,14 @@ def register():
 
     flash("Đăng ký thành công! Hãy đăng nhập")
     return redirect("/auth")
+
+
+def logout():
+    """Đăng xuất an toàn: Giữ lại session['cart'], chỉ xóa thông tin người dùng"""
+    # Xóa thông tin đăng nhập
+    session.pop("user_id", None)
+    session.pop("vaiTro", None)
+    session.pop("hoTen", None)
+
+    flash("Đã đăng xuất thành công!")
+    return redirect("/")

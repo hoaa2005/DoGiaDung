@@ -108,13 +108,19 @@
                             {% endif %}
                         </td>
                         <td style="font-size: 12px; color: #94a3b8;">{{ user.ngayTao }}</td>
-                        <td class="action-btns" style="justify-content: flex-end;">
-                            <a href="javascript:void(0)" class="btn-icon btn-edit" 
-                               data-id="{{ user.id }}" data-hoten="{{ user.hoTen }}" 
-                               data-email="{{ user.email }}" data-tendangnhap="{{ user.tenDangNhap }}" 
-                               data-vaitro="{{ user.vaiTro }}" onclick="handleEdit(this)">
-                                <i class="fa-solid fa-pen"></i>
-                            </a>
+                        <td class="action-btns" style="justify-content: flex-end;"><a href="javascript:void(0)"
+   class="btn-icon btn-edit"
+
+   data-id="{{ user.id }}"
+   data-hoten="{{ user.hoTen }}"
+   data-email="{{ user.email }}"
+   data-tendangnhap="{{ user.tenDangNhap }}"
+   data-vaitro="{{ user.vaiTro }}"
+
+   onclick="handleEdit(this)">
+
+    <i class="fa-solid fa-pen"></i>
+</a>
                             
                             {% if user.trangThai == 1 %}
                             <a href="/admin/user/lock/{{ user.id }}" class="btn-icon" style="background:#fff3e0;color:#ff9800;" onclick="return confirm('Khóa tài khoản này?')">
@@ -180,33 +186,81 @@
 </div>
 
 <script>
+
+    // MỞ MODAL THÊM
     function openAddModal() {
-        document.getElementById("modalTitle").innerText = "Thêm tài khoản mới";
-        document.getElementById("userForm").action = "/admin/user/add";
+
+        document.getElementById("modalTitle").innerText =
+            "Thêm tài khoản mới";
+
+        document.getElementById("userForm").action =
+            "/admin/user/add";
+
         document.getElementById("userForm").reset();
-        document.getElementById("passNote").style.display = "none";
+
         document.getElementById("matKhau").required = true;
+
+        document.getElementById("passNote").style.display = "none";
+
         document.getElementById("userModal").style.display = "flex";
     }
 
+
+    // MODAL SỬA
     function handleEdit(btn) {
-        document.getElementById("modalTitle").innerText = "Chỉnh sửa tài khoản";
-        document.getElementById("userForm").action = "/admin/user/edit/" + btn.dataset.id;
-        document.getElementById("hoTen").value = btn.dataset.hoten;
-        document.getElementById("email").value = btn.dataset.email;
-        document.getElementById("tenDangNhap").value = btn.dataset.tendangnhap;
-        document.getElementById("vaiTro").value = btn.dataset.vaitro;
+
+        document.getElementById("modalTitle").innerText =
+            "Chỉnh sửa tài khoản";
+
+        // ACTION FORM
+        document.getElementById("userForm").action =
+            "/admin/user/edit/" + btn.dataset.id;
+
+        // GÁN DỮ LIỆU
+        document.getElementById("hoTen").value =
+            btn.dataset.hoten;
+
+        document.getElementById("email").value =
+            btn.dataset.email;
+
+        document.getElementById("tenDangNhap").value =
+            btn.dataset.tendangnhap;
+
+        document.getElementById("vaiTro").value =
+            btn.dataset.vaitro;
+
+        // PASSWORD
+        document.getElementById("matKhau").value = "";
         document.getElementById("matKhau").required = false;
-        document.getElementById("passNote").style.display = "block";
-        document.getElementById("userModal").style.display = "flex";
+
+        document.getElementById("passNote").style.display =
+            "block";
+
+        // HIỆN MODAL
+        document.getElementById("userModal").style.display =
+            "flex";
     }
 
+
+    // ĐÓNG MODAL
     function closeModal() {
-        document.getElementById("userModal").style.display = "none";
+
+        document.getElementById("userModal").style.display =
+            "none";
     }
 
+
+    // CLICK NGOÀI MODAL
     window.onclick = function(e) {
-        if (e.target == document.getElementById("userModal")) closeModal();
+
+        const modal =
+            document.getElementById("userModal");
+
+        if (e.target == modal) {
+
+            closeModal();
+        }
     }
+
 </script>
 {% endblock %}

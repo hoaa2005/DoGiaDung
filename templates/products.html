@@ -1,0 +1,359 @@
+{% extends "layout_user.html" %}
+
+{% block title %}DGD — Danh Sách Sản Phẩm Gia Dụng{% endblock %}
+
+{% block content %}
+<style>
+    /* LAYOUT TỔNG THỂ TWO-COLUMN */
+    .products-page-container {
+        display: flex;
+        gap: 30px;
+        margin-top: 20px;
+        align-items: flex-start;
+    }
+
+    /* ===============================================================================
+       COL LEFT: SIDEBAR DANH MỤC
+    =============================================================================== */
+    .sidebar-filter {
+        flex: 0 0 280px;
+        background: #ffffff;
+        border: 1px solid rgba(255, 102, 153, 0.08);
+        border-radius: var(--radius-md);
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.02);
+        position: sticky;
+        top: 100px; /* Ghim cố định sidebar khi cuộn trang */
+    }
+    .sidebar-title {
+        font-size: 16px;
+        font-weight: 900;
+        color: var(--text-dark);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .sidebar-title .material-symbols-outlined {
+        color: var(--dgd-pink);
+    }
+    .category-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .category-item {
+        margin-bottom: 8px;
+    }
+    .category-link {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        border-radius: 8px;
+        color: var(--text-dark);
+        font-size: 14px;
+        font-weight: 600;
+        transition: var(--transition-smooth);
+    }
+    .category-link:hover, .category-link.active {
+        background: var(--dgd-pink-light);
+        color: var(--dgd-pink);
+    }
+    .category-count {
+        font-size: 11px;
+        background: #ffffff;
+        color: var(--text-muted);
+        padding: 2px 8px;
+        border-radius: 20px;
+        font-weight: 700;
+        border: 1px solid rgba(255, 102, 153, 0.1);
+    }
+    .category-link.active .category-count {
+        background: var(--dgd-pink);
+        color: #ffffff;
+    }
+
+    /* ===============================================================================
+       COL RIGHT: MAIN CONTENT & GRID PRODUCTS
+    =============================================================================== */
+    .main-products-content {
+        flex: 1;
+    }
+
+    /* THANH BỘ LỌC VÀ SẮP XẾP TRÊN ĐẦU */
+    .filter-bar {
+        background: #ffffff;
+        border: 1px solid rgba(255, 102, 153, 0.08);
+        border-radius: var(--radius-md);
+        padding: 16px 24px;
+        margin-bottom: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.02);
+    }
+    .filter-result-text {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-muted);
+    }
+    .filter-result-text strong {
+        color: var(--text-dark);
+    }
+    .sort-group {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .sort-label {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: var(--text-dark);
+    }
+    .sort-select {
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 102, 153, 0.15);
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--text-dark);
+        outline: none;
+        background-color: #ffffff;
+        cursor: pointer;
+    }
+    .sort-select:focus {
+        border-color: var(--dgd-pink);
+    }
+
+    /* LƯỚI SẢN PHẨM (GRID ĐÁP ỨNG) */
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr); /* 3 cột trên trang có sidebar */
+        gap: 24px;
+    }
+
+    @media (max-width: 1200px) {
+        .products-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* PRODUCT CARD UI (Đồng bộ trang chủ) */
+    .product-card {
+        background: #ffffff;
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(255, 102, 153, 0.08);
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.02);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        transition: var(--transition-smooth);
+        position: relative;
+    }
+    .product-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 30px rgba(255, 102, 153, 0.08);
+        border-color: rgba(255, 102, 153, 0.2);
+    }
+    .product-img-box {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        background: #f8fafc;
+        overflow: hidden;
+        position: relative;
+    }
+    .product-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: var(--transition-smooth);
+    }
+    .product-card:hover .product-img {
+        transform: scale(1.06);
+    }
+    .product-info-box {
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+    .product-category {
+        font-size: 11.5px;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        margin-bottom: 6px;
+    }
+    .product-name {
+        font-size: 14.5px;
+        font-weight: 700;
+        color: var(--text-dark);
+        line-height: 1.4;
+        height: 40px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin-bottom: 12px;
+    }
+    .product-card:hover .product-name { color: var(--dgd-pink); }
+    
+    .product-price-row {
+        display: flex;
+        align-items: baseline;
+        gap: 4px;
+        margin-bottom: 16px;
+    }
+    .price-current { font-size: 17px; font-weight: 800; color: var(--text-dark); }
+    .price-unit { font-size: 13px; font-weight: 700; color: var(--text-dark); }
+
+    /* HỆ THỐNG NÚT BẤM SONG SONG 50:50 */
+    .product-action-group {
+        display: flex;
+        gap: 10px;
+        margin-top: auto;
+        width: 100%;
+    }
+    .product-action-group form {
+        flex: 1;
+        display: flex;
+    }
+    .product-action-group button {
+        width: 100%;
+        height: 40px;
+        border-radius: 8px;
+        font-size: 12.5px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        transition: var(--transition-smooth);
+    }
+    .btn-add-cart {
+        border: 1.5px solid var(--dgd-pink);
+        background: var(--dgd-pink-light);
+        color: var(--dgd-pink);
+    }
+    .btn-add-cart:hover {
+        background: var(--dgd-pink);
+        color: #ffffff;
+    }
+    .btn-buy-now {
+        background: var(--dgd-pink-gradient);
+        color: #ffffff;
+        border: none;
+    }
+    .btn-buy-now:hover {
+        box-shadow: 0 4px 12px rgba(255, 102, 153, 0.25);
+        opacity: 0.95;
+    }
+</style>
+
+<div class="products-page-container">
+    
+    <aside class="sidebar-filter">
+        <div class="sidebar-title">
+            <span class="material-symbols-outlined">widgets</span>
+            <span>Danh mục sản phẩm</span>
+        </div>
+        <ul class="category-list">
+            <li class="category-item">
+                <a href="/products" class="category-link {% if not current_cat %}active{% endif %}">
+                    <span>Tất cả sản phẩm</span>
+                    <span class="category-count">{{ total_count }}</span>
+                </a>
+            </li>
+            
+            {% for cat in categories %}
+            <li class="category-item">
+                <a href="/products?category={{ cat.id }}&sort={{ current_sort }}&search={{ search_query }}" 
+                   class="category-link {% if current_cat == cat.id|string %}active{% endif %}">
+                    <span>{{ cat.tenDanhMuc }}</span>
+                    <span class="category-count">{{ cat.soLuongSp }}</span>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </aside>
+
+    <main class="main-products-content">
+        
+        <div class="filter-bar">
+            <div class="filter-result-text">
+                {% if search_query %}
+                    Kết quả tìm kiếm cho: "<strong>{{ search_query }}</strong>" ({{ products|length }} sản phẩm)
+                {% else %}
+                    Hiển thị: <strong>{{ products|length }}</strong> sản phẩm tìm thấy
+                {% endif %}
+            </div>
+            
+            <div class="sort-group">
+                <label class="sort-label" for="sortSelect">Sắp xếp theo:</label>
+                <select class="sort-select" id="sortSelect" onchange="location = this.value;">
+                    <option value="/products?category={{ current_cat }}&sort=newest&search={{ search_query }}" {% if current_sort == 'newest' %}selected{% endif %}>Mới nhất</option>
+                    <option value="/products?category={{ current_cat }}&sort=price_asc&search={{ search_query }}" {% if current_sort == 'price_asc' %}selected{% endif %}>Giá: Thấp đến Cao</option>
+                    <option value="/products?category={{ current_cat }}&sort=price_desc&search={{ search_query }}" {% if current_sort == 'price_desc' %}selected{% endif %}>Giá: Cao đến Thấp</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="products-grid">
+            {% if products and products|length > 0 %}
+                {% for sp in products %}
+                <div class="product-card">
+                    <div class="product-img-box">
+                        {% if sp.duongDanAnh %}
+                            {% if 'http' in sp.duongDanAnh or '/' in sp.duongDanAnh %}
+                                <img src="{{ sp.duongDanAnh }}" alt="{{ sp.tenSanPham }}" class="product-img">
+                            {% else %}
+                                <img src="/static/uploads/products/{{ sp.duongDanAnh }}" alt="{{ sp.tenSanPham }}" class="product-img">
+                            {% endif %}
+                        {% else %}
+                            <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff5f7; color: var(--dgd-pink);">
+                                <span class="material-symbols-outlined" style="font-size: 40px; margin-bottom: 4px;">image_not_supported</span>
+                                <span style="font-size: 11px; font-weight: 600; opacity: 0.7;">Chưa có hình ảnh</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="product-info-box">
+                        <div class="product-category">{{ sp.tenDanhMuc or 'Gia dụng thông minh' }}</div>
+                        <div class="product-name" title="{{ sp.tenSanPham }}">{{ sp.tenSanPham }}</div>
+                        
+                        <div class="product-price-row">
+                            <span class="price-current">{{ "{:,.0f}".format(sp.gia) }}</span>
+                            <span class="price-unit">₫</span>
+                        </div>
+
+                        <div class="product-action-group">
+    <form action="/cart/add/{{ sp.id }}" method="GET">
+        <button type="submit" class="btn-add-cart">
+            <span class="material-symbols-outlined" style="font-size: 18px;">shopping_cart</span>
+            <span>Giỏ hàng</span>
+        </button>
+    </form>
+
+    <form action="/cart/buy-now/{{ sp.id }}" method="GET">
+        <button type="submit" class="btn-buy-now">
+            <span class="material-symbols-outlined" style="font-size: 18px;">bolt</span>
+            <span>Mua ngay</span>
+        </button>
+    </form>
+</div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div style="grid-column: span 3; text-align: center; padding: 80px 0; color: var(--text-muted);">
+                    <span class="material-symbols-outlined" style="font-size: 56px; color: var(--dgd-pink); margin-bottom: 12px;">search_off</span>
+                    <p style="font-weight: 600; font-size: 15px;">Rất tiếc, DGD không tìm thấy sản phẩm nào phù hợp với bộ lọc!</p>
+                </div>
+            {% endif %}
+        </div>
+
+    </main>
+</div>
+{% endblock %}
