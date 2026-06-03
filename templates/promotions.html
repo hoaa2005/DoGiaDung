@@ -1,33 +1,30 @@
 {% extends "layout_user.html" %}
 {% block content %}
-<div class="container" style="padding: 40px 0;">
-    <h2 style="margin-bottom: 30px; font-weight: 900; color: var(--text-dark);">🎁 Mã giảm giá dành riêng cho bạn</h2>
-    
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
-        {% for v in vouchers %}
-        <div class="voucher-card" style="background: #fff; border: 2px dashed var(--dgd-pink); padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h3 style="color: var(--dgd-pink); margin: 0;">{{ v.maCode }}</h3>
-                <p style="font-size: 13px; color: #666; margin: 5px 0;">Giảm {{ v.phanTram }}% cho đơn hàng</p>
-                <small style="color: #999;">HSD: {{ v.ngayHetHan }}</small>
-            </div>
-            <form action="/promotion/save/{{ v.maCode }}" method="POST">
-                <button type="submit" style="background: var(--dgd-pink); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Lưu</button>
-            </form>
+<div class="container" style="padding: 40px 0; max-width: 1000px; margin: auto;">
+
+    <h2 style="font-weight: 800; margin-bottom: 20px;">💼 Ví Voucher của tôi</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 50px;">
+        {% for v in my_vouchers %}
+        <div style="background: #fdfdfd; border-left: 5px solid #28a745; padding: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+            <h4 style="margin: 0; color: #28a745;">{{ v.maCode }}</h4>
+            <p style="font-size: 14px; margin: 5px 0;">Giảm {{ v.phanTram }}% toàn bộ đơn hàng</p>
+            <span style="font-size: 12px; color: #888;">Có hiệu lực đến: {{ v.ngayHetHan }}</span>
         </div>
+        {% else %}
+        <p style="color: #999;">Bạn chưa lưu mã nào. Hãy xem các ưu đãi bên dưới nhé!</p>
         {% endfor %}
     </div>
 
-    <h2 style="margin: 50px 0 30px; font-weight: 900;">🔥 Gợi ý sản phẩm cho bạn</h2>
-    <div class="products-row" style="display: flex; gap: 20px; overflow-x: auto;">
-        {% for p in recommends %}
-            <div class="product-card" style="min-width: 200px;">
-                <img src="/static/uploads/products/{{ p.duongDanAnh }}" alt="{{ p.tenSanPham }}" style="width: 100%;">
-                <div style="padding: 10px;">
-                    <p style="font-weight: 700;">{{ p.tenSanPham }}</p>
-                    <p style="color: var(--dgd-pink);">{{ "{:,.0f}".format(p.gia) }} đ</p>
-                </div>
-            </div>
+    <h2 style="font-weight: 800; margin-bottom: 20px;">🎁 Ưu đãi độc quyền dành cho bạn</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
+        {% for v in system_vouchers %}
+        <div style="background: #fff; border: 1px solid #eee; padding: 20px; border-radius: 15px; text-align: center; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <div style="font-size: 24px; font-weight: bold; color: var(--dgd-pink); margin-bottom: 10px;">{{ v.maCode }}</div>
+            <p style="color: #555; margin-bottom: 15px;">Tiết kiệm ngay {{ v.phanTram }}%</p>
+            <form action="/promotion/save/{{ v.id }}" method="POST">
+                <button type="submit" style="width: 100%; padding: 10px; background: var(--dgd-pink); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Lưu mã ngay</button>
+            </form>
+        </div>
         {% endfor %}
     </div>
 </div>

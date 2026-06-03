@@ -1,101 +1,111 @@
 import sqlite3
 
-DB_PATH = "database/database.db"
-
-
-def get_cart_items_details_db(cart_session_dict):
-    """Lấy thông tin sản phẩm từ giỏ hàng Session"""
-    if not cart_session_dict:
-        return []
-
-    conn = sqlite3.connect(DB_PATH)
+def get_db_connection():
+    conn = sqlite3.connect("database/database.db")
     conn.row_factory = sqlite3.Row
+    return conn
+
+
+# 1. Lấy danh sách đơn hàng của người dùng
+def get_orders_by_user_db(user_id):
+    conn = get_db_connection()
     try:
-        placeholders = ",".join(["?"] * len(cart_session_dict))
-        product_ids = [int(k) for k in cart_session_dict.keys()]
-
-        query = f"""
-            SELECT p.id, p.tenSanPham, p.gia, t.soLuong AS tonKho,
-                   (SELECT duongDanAnh FROM hinh_anh_san_pham WHERE sanPhamId = p.id LIMIT 1) AS duongDanAnh
-            FROM san_pham p
-            LEFT JOIN ton_kho t ON p.id = t.sanPhamId
-            WHERE p.id IN ({placeholders})
-        """
-        rows = conn.execute(query, product_ids).fetchall()
-
-        cart_items = []
-        for row in rows:
-            p_id = str(row["id"])
-            qty = int(cart_session_dict[p_id])
-            cart_items.append({
-                "id": row["id"],
-                "tenSanPham": row["tenSanPham"],
-                "gia": row["gia"],
-                "duongDanAnh": row["duongDanAnh"],
-                "tonKho": row["tonKho"],
-                "soLuong mua": qty,
-                "thanhTien": row["gia"] * qty
-            })
-        return cart_items
+        return conn.execute(
+            "SELECT * FROM don_hang WHERE nguoiDungId = ? ORDER BY ngayTao DESC",
+            (user_id,)
+        ).fetchall()
     finally:
         conn.close()
 
 
-def create_order_transaction_db(user_id, cart_session_dict, checkout_data):
-    """Lưu đơn hàng và trừ kho"""
-    conn = sqlite3.connect(DB_PATH)
+# 2. Xem chi tiết đơn hàng (Sử dụng cho trang chi tiết)
+def get_order_details_db(order_id):
+    conn = get_db_connection()
+    try:
+        query = """
+            SELECT sp.tenSanPham, ct.soLuong, ct.gia, (ct.soLuong * ct.gia) AS thanhTien
+            FROM chi_tiet_don_hang ct
+            JOIN san_pham sp ON ct.sanPhamId = sp.id
+            WHERE ct.donHangId = ?
+        """
+        return conn.execute(query, (order_id,)).fetchall()
+    finally:
+        conn.close()
+
+
+# 3. Hủy đơn hàng (Nghiệp vụ quan trọng: Hoàn lại tồn kho)
+def cancel_order_db(order_id, user_id):
+    conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        # 1. Tính tổng tiền
-        tongTienHang = 0
-        for p_id, qty in cart_session_dict.items():
-            product = conn.execute("SELECT gia FROM san_pham WHERE id = ?", (p_id,)).fetchone()
-            tongTienHang += product[0] * int(qty)
+        cursor.execute("BEGIN TRANSACTION")
 
-        phiShip = 30000 if checkout_data["vanChuyen"] == "Express" else 15000
-        tongThanhToan = tongTienHang + phiShip
+        # Kiểm tra đơn hàng thuộc về user và đang ở trạng thái 'Chờ xử lý'
+        order = cursor.execute(
+            "SELECT * FROM don_hang WHERE id = ? AND nguoiDungId = ? AND trangThai = 'Chờ xử lý'",
+            (order_id, user_id)
+        ).fetchone()
 
-        # 2. Thêm đơn hàng
-        cursor.execute("""
-            INSERT INTO don_hang (nguoiDungId, ngayDat, tongTien, diaChiGiaoHang, phuongThucVatChuyen, phiVanChuyen, phuongThucThanhToan, trangThaiDonHang)
-            VALUES (?, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?, 'Chờ xử lý')
-        """, (user_id, tongThanhToan, checkout_data["diaChi"], checkout_data["vanChuyen"], phiShip,
-              checkout_data["thanhToan"]))
+        if not order:
+            raise Exception("Đơn hàng không tồn tại hoặc đã được xử lý, không thể hủy!")
 
-        order_id = cursor.lastrowid
+        # Lấy danh sách sản phẩm trong đơn để hoàn kho
+        items = cursor.execute("SELECT sanPhamId, soLuong FROM chi_tiet_don_hang WHERE donHangId = ?",
+                               (order_id,)).fetchall()
 
-        # 3. Thêm chi tiết và trừ kho
-        for p_id, qty in cart_session_dict.items():
-            product = conn.execute("SELECT gia FROM san_pham WHERE id = ?", (p_id,)).fetchone()
-            cursor.execute("INSERT INTO chi_tiet_don_hang (donHangId, sanPhamId, soLuong, giaBan) VALUES (?, ?, ?, ?)",
-                           (order_id, p_id, qty, product[0]))
-            cursor.execute("UPDATE ton_kho SET soLuong = soLuong - ? WHERE sanPhamId = ?", (qty, p_id))
+        for item in items:
+            cursor.execute("UPDATE ton_kho SET soLuong = soLuong + ? WHERE sanPhamId = ?",
+                           (item["soLuong"], item["sanPhamId"]))
+
+        # Cập nhật trạng thái đơn hàng
+        cursor.execute("UPDATE don_hang SET trangThai = 'Đã hủy' WHERE id = ?", (order_id,))
 
         conn.commit()
-        return order_id
     except Exception as e:
         conn.rollback()
         raise e
     finally:
         conn.close()
-import sqlite3
 
-def get_orders_by_user(user_id):
-    conn = sqlite3.connect("database/database.db")
-    conn.row_factory = sqlite3.Row
-    orders = conn.execute("SELECT * FROM don_hang WHERE nguoiDungId = ? ORDER BY ngayTao DESC", (user_id,)).fetchall()
-    conn.close()
-    return orders
 
-def get_order_details(order_id):
-    conn = sqlite3.connect("database/database.db")
-    conn.row_factory = sqlite3.Row
-    # Lấy thông tin sản phẩm trong đơn hàng
-    details = conn.execute("""
-        SELECT sp.tenSanPham, ct.soLuong, ct.gia 
-        FROM chi_tiet_don_hang ct
-        JOIN san_pham sp ON ct.sanPhamId = sp.id
-        WHERE ct.donHangId = ?
-    """, (order_id,)).fetchall()
-    conn.close()
-    return details
+# --- BỔ SUNG VÀO CUỐI FILE models/order_user_model.py ---
+
+def create_order_db(user_id, cart_items, tong_tien, dia_chi, thanh_toan_id):
+    """
+    cart_items: Danh sách các dict sản phẩm từ hàm get_cart_items_details_db
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Bắt đầu giao dịch để đảm bảo an toàn dữ liệu
+        cursor.execute("BEGIN TRANSACTION")
+
+        # 1. Thêm vào bảng don_hang
+        # Đảm bảo tên các cột trong DB của bạn khớp với ('nguoiDungId', 'tongTien', 'diaChi', 'trangThai', 'thanhToanId', 'ngayTao')
+        cursor.execute("""
+            INSERT INTO don_hang (nguoiDungId, tongTien, diaChi, trangThai, thanhToanId, ngayTao)
+            VALUES (?, ?, ?, 'Chờ xử lý', ?, datetime('now'))
+        """, (user_id, tong_tien, dia_chi, thanh_toan_id))
+
+        order_id = cursor.lastrowid
+
+        # 2. Thêm vào chi_tiet_don_hang và Trừ kho
+        for item in cart_items:
+            # Lưu chi tiết đơn hàng
+            cursor.execute("""
+                INSERT INTO chi_tiet_don_hang (donHangId, sanPhamId, soLuong, gia)
+                VALUES (?, ?, ?, ?)
+            """, (order_id, item['id'], item['soLuong mua'], item['gia']))
+
+            # Trừ tồn kho (Cập nhật bảng ton_kho)
+            cursor.execute("UPDATE ton_kho SET soLuong = soLuong - ? WHERE sanPhamId = ?",
+                           (item['soLuong mua'], item['id']))
+
+        # Lưu thay đổi
+        conn.commit()
+        return order_id
+    except Exception as e:
+        conn.rollback()  # Hoàn tác nếu có lỗi
+        raise e
+    finally:
+        conn.close()

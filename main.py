@@ -87,39 +87,86 @@ import controllers.auth_controller as auth_ctrl
 
 
 
-# --- ROUTE GIỎ HÀNG & THANH TOÁN ---
+# Route xử lý Thêm vào giỏ hàng (POST)
+# --- ROUTE XỬ LÝ THÊM GIỎ HÀNG (Dùng GET như giao diện cũ của bạn) ---
+@app.route("/cart/add/<int:sp_id>", methods=["GET"])
+def add_to_cart_route(sp_id):
+    cart = session.get("cart", {})
+    # Tăng số lượng hoặc khởi tạo mới
+    cart[str(sp_id)] = cart.get(str(sp_id), 0) + 1
+    session["cart"] = cart
 
-# Trang giỏ hàng
-@app.route("/cart", endpoint="cart_page")
-def cart_page():
-    return user_cart_ctrl.cart_page_controller()
-
-# Thêm vào giỏ (Nút "Giỏ hàng" ở trang chủ/sản phẩm)
-@app.route("/cart/add/<int:p_id>", methods=["GET"])
-def add_to_cart(p_id):
-    return user_cart_ctrl.add_to_cart_controller(p_id)
-
-# Mua ngay (Nút "Mua ngay" ở trang chủ/sản phẩm)
-@app.route("/cart/buy-now/<int:p_id>", methods=["GET"])
-def buy_now(p_id):
-    return user_cart_ctrl.buy_now_controller(p_id)
-
-# Tăng giảm số lượng (Nút + - trong giỏ)
-@app.route("/cart/update/<int:p_id>", methods=["POST"])
-def update_cart(p_id):
-    return user_cart_ctrl.update_cart_controller(p_id)
-
-# Xóa sản phẩm khỏi giỏ
-@app.route("/cart/delete/<int:p_id>")
-def delete_item(p_id):
-    return user_cart_ctrl.delete_cart_item_controller(p_id)
-
-# Xác nhận đặt hàng
-@app.route("/cart/checkout", methods=["POST"])
-def checkout():
-    return user_cart_ctrl.checkout_process_controller()
+    flash("Đã thêm vào giỏ hàng!")
+    return redirect(request.referrer or "/products")
 
 
+# --- ROUTE XỬ LÝ MUA NGAY (Dùng GET như giao diện cũ của bạn) ---
+@app.route("/cart/buy-now/<int:sp_id>", methods=["GET"])
+def buy_now_route(sp_id):
+    cart = session.get("cart", {})
+    # Thêm sản phẩm vào giỏ
+    cart[str(sp_id)] = cart.get(str(sp_id), 0) + 1
+    session["cart"] = cart
+
+    # Chuyển thẳng tới trang thanh toán
+    return redirect("/cart")
+
+from controllers.cart_controller import (
+    cart_page_controller,
+    update_cart_controller,
+    delete_cart_item_controller
+)
+
+
+@app.route("/cart", methods=["GET"])
+def cart():
+    return cart_page_controller()
+
+@app.route("/cart/update/<int:product_id>", methods=["POST"])
+def update_cart(product_id):
+    return update_cart_controller(product_id)
+
+@app.route("/cart/delete/<int:product_id>")
+def delete_cart(product_id):
+    return delete_cart_item_controller(product_id)
+
+from controllers.order_user_controller import my_orders_controller, order_detail_controller, cancel_order_controller
+
+# Route danh sách đơn hàng
+@app.route("/my-orders")
+def my_orders():
+    return my_orders_controller()
+
+# Route xem chi tiết
+@app.route("/order/detail/<int:order_id>")
+def order_detail(order_id):
+    return order_detail_controller(order_id)
+
+# Route hủy đơn (POST để đảm bảo tính bảo mật)
+@app.route("/cancel-order/<int:order_id>", methods=["POST"])
+def cancel_order(order_id):
+    return cancel_order_controller(order_id)
+
+# Route danh sách đơn hàng
+# --- ROUTE DANH SÁCH ĐƠN HÀNG ---
+@app.route("/my-orders")
+def route_my_orders(): # Đã đổi tên hàm từ 'my_orders' thành 'route_my_orders'
+    return my_orders_controller()
+
+# --- ROUTE CHI TIẾT ĐƠN HÀNG ---
+@app.route("/order/detail/<int:order_id>")
+def route_order_detail(order_id): # Đã đổi tên hàm
+    return order_detail_controller(order_id)
+
+# --- ROUTE HỦY ĐƠN HÀNG ---
+@app.route("/cancel-order/<int:order_id>", methods=["POST"])
+def route_cancel_order(order_id): # Đã đổi tên hàm
+    return cancel_order_controller(order_id)
+
+
+
+
+#===================================================================
 import controllers.promotion_controller as promo_ctrl
 
 # --- ROUTE TRANG KHUYẾN MÃI ---
@@ -127,17 +174,30 @@ import controllers.promotion_controller as promo_ctrl
 def promotions():
     return promo_ctrl.promotion_page_controller()
 
-# --- ROUTE LƯU MÃ GIẢM GIÁ ---
-@app.route("/promotion/save/<string:maCode>", methods=["POST"])
-def save_voucher(maCode):
-    return promo_ctrl.save_voucher_controller(maCode)
+# --- ROUTE LƯU MÃ GIẢM GIÁ (Sửa thành id để khớp với Controller/Model) ---
+@app.route("/promotion/save/<int:giam_gia_id>", methods=["POST"])
+def save_voucher(giam_gia_id):
+    return promo_ctrl.save_voucher_controller(giam_gia_id)
 
-# --- ROUTE HỦY MÃ (Nếu muốn hủy mã đã chọn) ---
+# --- ROUTE ÁP DỤNG MÃ VÀO GIỎ HÀNG (Mới) ---
+@app.route("/promotion/apply", methods=["POST"])
+def apply_voucher():
+    return promo_ctrl.apply_voucher_controller()
+
+# --- ROUTE HỦY MÃ ---
 @app.route("/remove-voucher")
 def remove_voucher():
     session.pop("applied_voucher", None)
     flash("Đã hủy mã giảm giá.")
     return redirect("/cart")
+
+
+# --- Đảm bảo đã import controller ---
+import controllers.order_user_controller as user_cart_ctrl
+
+# --- ROUTE QUẢN LÝ ĐƠN HÀNG CỦA NGƯỜI DÙNG ---
+
+
 # ===============================================================================
 # ADMIN: DASHBOARD
 # ===============================================================================
